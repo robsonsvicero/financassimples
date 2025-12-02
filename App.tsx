@@ -137,7 +137,8 @@ const App: React.FC = () => {
         email,
         password: pass,
         options: {
-          data: { name }
+          data: { name },
+          emailRedirectTo: window.location.origin
         }
       });
       if (error) throw error;
