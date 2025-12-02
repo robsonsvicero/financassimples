@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Category } from '../types';
-import { Pencil, Trash2, Plus, Tag } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencil, faTrash, faPlus, faTag } from '@fortawesome/free-solid-svg-icons';
 import { ICON_MAP } from '../constants';
 
 interface CategoriesManagerProps {
@@ -84,9 +85,9 @@ const CategoriesManager: React.FC<CategoriesManagerProps> = ({
   };
 
   const getCategoryIcon = (iconName?: string) => {
-    if (!iconName) return <Tag size={20} />;
+    if (!iconName) return <FontAwesomeIcon icon={faTag} />;
     const IconComponent = ICON_MAP[iconName];
-    return IconComponent ? <IconComponent size={20} /> : <Tag size={20} />;
+    return IconComponent ? <FontAwesomeIcon icon={IconComponent} /> : <FontAwesomeIcon icon={faTag} />;
   };
 
   return (
@@ -102,7 +103,7 @@ const CategoriesManager: React.FC<CategoriesManagerProps> = ({
             onClick={() => setIsAdding(true)}
             className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
           >
-            <Plus size={20} />
+            <FontAwesomeIcon icon={faPlus} />
             Nova Categoria
           </button>
         )}
@@ -217,7 +218,7 @@ const CategoriesManager: React.FC<CategoriesManagerProps> = ({
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                   title="Editar"
                 >
-                  <Pencil size={16} />
+                  <FontAwesomeIcon icon={faPencil} />
                 </button>
                 <button
                   onClick={() => {
@@ -228,7 +229,7 @@ const CategoriesManager: React.FC<CategoriesManagerProps> = ({
                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   title="Excluir"
                 >
-                  <Trash2 size={16} />
+                  <FontAwesomeIcon icon={faTrash} />
                 </button>
               </div>
             </div>

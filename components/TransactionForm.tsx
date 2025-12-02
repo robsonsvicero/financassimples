@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, TransactionType, PaymentMethod, ExpenseType, Category, CreditCard } from '../types';
-import { X, Calendar } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark, faCalendar } from '@fortawesome/free-solid-svg-icons';
 
 interface TransactionFormProps {
   isOpen: boolean;
@@ -197,7 +198,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
              </button>
            </div>
            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full text-gray-500">
-             <X size={20} />
+             <FontAwesomeIcon icon={faXmark} />
            </button>
         </div>
 
@@ -238,7 +239,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Data</label>
                 <div className="relative">
-                  <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <FontAwesomeIcon icon={faCalendar} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input 
                     type="date"
                     value={date}

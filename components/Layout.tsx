@@ -1,5 +1,6 @@
 import React from 'react';
-import { LayoutDashboard, CreditCard, PieChart, FileText, Settings, User as UserIcon, LogOut, Menu } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChartLine, faCreditCard, faChartPie, faFileAlt, faGear, faUser, faRightFromBracket, faBars } from '@fortawesome/free-solid-svg-icons';
 import { User } from '../types';
 import { APP_LOGO } from '../constants';
 
@@ -32,13 +33,13 @@ const Layout: React.FC<LayoutProps> = ({
   }, [isMobileMenuOpen]);
   
   const navItems = React.useMemo(() => [
-    { id: 'dashboard', label: 'Painel', icon: LayoutDashboard },
-    { id: 'transactions', label: 'Transações', icon: FileText },
-    { id: 'cards', label: 'Cartões', icon: CreditCard },
-    { id: 'categories', label: 'Categorias', icon: PieChart },
-    { id: 'budget', label: 'Orçamento', icon: PieChart },
-    { id: 'reports', label: 'Relatórios', icon: FileText },
-    { id: 'settings', label: 'Config.', icon: Settings },
+    { id: 'dashboard', label: 'Painel', icon: faChartLine },
+    { id: 'transactions', label: 'Transações', icon: faFileAlt },
+    { id: 'cards', label: 'Cartões', icon: faCreditCard },
+    { id: 'categories', label: 'Categorias', icon: faChartPie },
+    { id: 'budget', label: 'Orçamento', icon: faChartPie },
+    { id: 'reports', label: 'Relatórios', icon: faFileAlt },
+    { id: 'settings', label: 'Config.', icon: faGear },
   ], []);
 
   const handleMobileNav = React.useCallback((tab: string) => {
@@ -70,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({
                 <img src={user.avatar} alt="User" className="w-10 h-10 rounded-full object-cover bg-white" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
-                  <UserIcon size={20} />
+                  <FontAwesomeIcon icon={faUser} />
                 </div>
               )}
               <div className="flex-1 min-w-0">
@@ -95,7 +96,6 @@ const Layout: React.FC<LayoutProps> = ({
         <nav className="flex-1 px-4 py-2 overflow-y-auto">
           <ul className="space-y-1">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <li key={item.id}>
@@ -107,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({
                       : 'text-gray-500 hover:bg-white/40 hover:text-gray-700'
                     }`}
                   >
-                    <Icon size={20} className={isActive ? 'text-violet-600' : 'text-gray-400'} />
+                    <FontAwesomeIcon icon={item.icon} className={isActive ? 'text-violet-600' : 'text-gray-400'} />
                     <span className="flex-1 text-left">{item.label}</span>
                     {isActive && (
                       <span className="text-violet-600 font-bold">{'›'}</span>
@@ -125,7 +125,7 @@ const Layout: React.FC<LayoutProps> = ({
             onClick={onLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all"
           >
-            <LogOut size={20} />
+            <FontAwesomeIcon icon={faRightFromBracket} />
             <span className="font-semibold">Sair</span>
           </button>
         </div>
@@ -136,7 +136,7 @@ const Layout: React.FC<LayoutProps> = ({
       {isMobile && (
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-lg z-40 flex items-center justify-between px-4 border-b border-gray-200/80">
         <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-gray-600">
-          <Menu size={24} />
+          <FontAwesomeIcon icon={faBars} size="lg" />
         </button>
         <div className="flex items-center gap-2">
            <img src={APP_LOGO} alt="Logo" className="w-8 h-8 object-contain" />
@@ -169,7 +169,7 @@ const Layout: React.FC<LayoutProps> = ({
                   <img src={user.avatar} alt="User" className="w-10 h-10 rounded-full object-cover bg-white" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
-                    <UserIcon size={20} />
+                    <FontAwesomeIcon icon={faUser} />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
@@ -196,7 +196,6 @@ const Layout: React.FC<LayoutProps> = ({
           <nav className="flex-1 px-4 py-4 overflow-y-auto">
             <ul className="space-y-1">
               {navItems.map((item) => {
-                const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 return (
                   <li key={item.id}>
@@ -208,7 +207,7 @@ const Layout: React.FC<LayoutProps> = ({
                         : 'text-gray-500 hover:bg-gray-50'
                       }`}
                     >
-                      <Icon size={20} className={isActive ? 'text-violet-600' : 'text-gray-400'} />
+                      <FontAwesomeIcon icon={item.icon} className={isActive ? 'text-violet-600' : 'text-gray-400'} />
                       <span className="flex-1 text-left">{item.label}</span>
                       {isActive && (
                         <span className="text-violet-600 font-bold">{'›'}</span>
@@ -229,7 +228,7 @@ const Layout: React.FC<LayoutProps> = ({
               }}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all"
             >
-              <LogOut size={20} />
+              <FontAwesomeIcon icon={faRightFromBracket} />
               <span className="font-semibold">Sair</span>
             </button>
           </div>

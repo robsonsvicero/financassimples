@@ -1,32 +1,32 @@
 import { Category, CreditCard } from './types';
 import { 
-  Receipt, Bus, Wifi, Droplets, Zap, Home, Utensils, 
-  HeartPulse, GraduationCap, Plane, Shirt, ShoppingCart, 
-  Paperclip, MoreHorizontal, DollarSign
-} from 'lucide-react';
+  faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
+  faHeartPulse, faGraduationCap, faPlane, faShirt, faCartShopping, 
+  faPaperclip, faEllipsis, faDollarSign
+} from '@fortawesome/free-solid-svg-icons';
 
 export const INITIAL_CATEGORIES: Category[] = [
-  { id: '1', name: 'Taxas e Impostos', icon: 'Receipt', color: 'text-red-500', type: 'EXPENSE' },
-  { id: '2', name: 'Transporte', icon: 'Bus', color: 'text-blue-500', type: 'EXPENSE' },
-  { id: '3', name: 'Internet', icon: 'Wifi', color: 'text-cyan-500', type: 'EXPENSE' },
-  { id: '4', name: 'Água', icon: 'Droplets', color: 'text-blue-400', type: 'EXPENSE' },
-  { id: '5', name: 'Eletricidade', icon: 'Zap', color: 'text-yellow-500', type: 'EXPENSE' },
-  { id: '6', name: 'Aluguel', icon: 'Home', color: 'text-indigo-500', type: 'EXPENSE' },
-  { id: '7', name: 'Alimentação', icon: 'Utensils', color: 'text-orange-500', type: 'EXPENSE' },
-  { id: '8', name: 'Saúde', icon: 'HeartPulse', color: 'text-pink-500', type: 'EXPENSE' },
-  { id: '9', name: 'Educação', icon: 'GraduationCap', color: 'text-purple-500', type: 'EXPENSE' },
-  { id: '10', name: 'Lazer', icon: 'Plane', color: 'text-green-500', type: 'EXPENSE' },
-  { id: '11', name: 'Vestuário', icon: 'Shirt', color: 'text-teal-500', type: 'EXPENSE' },
-  { id: '12', name: 'Supermercado', icon: 'ShoppingCart', color: 'text-emerald-600', type: 'EXPENSE' },
-  { id: '13', name: 'Material de Escritório', icon: 'Paperclip', color: 'text-gray-500', type: 'EXPENSE' },
-  { id: '14', name: 'Outros', icon: 'MoreHorizontal', color: 'text-slate-500', type: 'BOTH' },
-  { id: '15', name: 'Salário', icon: 'DollarSign', color: 'text-green-600', type: 'INCOME' },
+  { id: '1', name: 'Taxas e Impostos', icon: 'faReceipt', color: 'text-red-500', type: 'EXPENSE' },
+  { id: '2', name: 'Transporte', icon: 'faBus', color: 'text-blue-500', type: 'EXPENSE' },
+  { id: '3', name: 'Internet', icon: 'faWifi', color: 'text-cyan-500', type: 'EXPENSE' },
+  { id: '4', name: 'Água', icon: 'faDroplet', color: 'text-blue-400', type: 'EXPENSE' },
+  { id: '5', name: 'Eletricidade', icon: 'faBolt', color: 'text-yellow-500', type: 'EXPENSE' },
+  { id: '6', name: 'Aluguel', icon: 'faHouse', color: 'text-indigo-500', type: 'EXPENSE' },
+  { id: '7', name: 'Alimentação', icon: 'faUtensils', color: 'text-orange-500', type: 'EXPENSE' },
+  { id: '8', name: 'Saúde', icon: 'faHeartPulse', color: 'text-pink-500', type: 'EXPENSE' },
+  { id: '9', name: 'Educação', icon: 'faGraduationCap', color: 'text-purple-500', type: 'EXPENSE' },
+  { id: '10', name: 'Lazer', icon: 'faPlane', color: 'text-green-500', type: 'EXPENSE' },
+  { id: '11', name: 'Vestuário', icon: 'faShirt', color: 'text-teal-500', type: 'EXPENSE' },
+  { id: '12', name: 'Supermercado', icon: 'faCartShopping', color: 'text-emerald-600', type: 'EXPENSE' },
+  { id: '13', name: 'Material de Escritório', icon: 'faPaperclip', color: 'text-gray-500', type: 'EXPENSE' },
+  { id: '14', name: 'Outros', icon: 'faEllipsis', color: 'text-slate-500', type: 'BOTH' },
+  { id: '15', name: 'Salário', icon: 'faDollarSign', color: 'text-green-600', type: 'INCOME' },
 ];
 
 export const ICON_MAP: Record<string, any> = {
-  Receipt, Bus, Wifi, Droplets, Zap, Home, Utensils, 
-  HeartPulse, GraduationCap, Plane, Shirt, ShoppingCart, 
-  Paperclip, MoreHorizontal, DollarSign
+  faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
+  faHeartPulse, faGraduationCap, faPlane, faShirt, faCartShopping, 
+  faPaperclip, faEllipsis, faDollarSign
 };
 
 export const MOCK_CARDS: CreditCard[] = [

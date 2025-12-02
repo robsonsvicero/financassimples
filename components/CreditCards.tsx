@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { CreditCard, Transaction } from '../types';
-import { Plus, CreditCard as CardIcon, Trash2, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faCreditCard, faTrash, faPencil, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { MONTH_NAMES } from '../constants';
 
 interface CreditCardsProps {
@@ -97,7 +98,7 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
            onClick={handleOpenAddForm}
            className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-medium hover:bg-slate-700 transition-colors"
          >
-           <Plus size={16} />
+           <FontAwesomeIcon icon={faPlus} />
            Novo Cartão
          </button>
        </div>
@@ -166,7 +167,7 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
                 <div className="relative z-10 flex flex-col justify-between h-full">
                   <div className="flex justify-between items-start">
                      <h3 className="font-bold text-lg">{card.name}</h3>
-                     <CardIcon size={24} className="opacity-80" />
+                     <FontAwesomeIcon icon={faCreditCard} className="opacity-80 text-xl" />
                   </div>
                   <div className="space-y-1">
                      <p className="text-xs opacity-70 uppercase tracking-wider">Próxima Fatura</p>
@@ -196,14 +197,14 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
                           title="Editar Cartão"
                         >
-                          <Pencil size={16} />
+                          <FontAwesomeIcon icon={faPencil} />
                         </button>
                         <button 
                           onClick={() => handleDelete(selectedCard.id)}
                           className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Excluir Cartão"
                         >
-                          <Trash2 size={16} />
+                          <FontAwesomeIcon icon={faTrash} />
                         </button>
                      </div>
                    </div>
@@ -214,13 +215,13 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
                   {/* Navegação por Mês */}
                   <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
                     <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-                      <ChevronLeft size={20} />
+                      <FontAwesomeIcon icon={faChevronLeft} />
                     </button>
                     <div className="px-2 sm:px-4 py-1 text-center min-w-[120px] sm:min-w-[140px] font-medium text-gray-700 text-sm sm:text-base">
                       {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
                     </div>
                     <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-                      <ChevronRight size={20} />
+                      <FontAwesomeIcon icon={faChevronRight} />
                     </button>
                   </div>
                   

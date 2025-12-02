@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType, Category, Budget } from '../types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Eye, EyeOff } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 interface BudgetAnalysisProps {
   transactions: Transaction[];
@@ -59,7 +60,7 @@ const BudgetAnalysis: React.FC<BudgetAnalysisProps> = ({ transactions, categorie
            onClick={() => setShowCharts(!showCharts)}
            className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-xl border border-violet-100 shadow-sm hover:bg-violet-50 transition-colors"
          >
-           {showCharts ? <EyeOff size={18} /> : <Eye size={18} />}
+           {showCharts ? <FontAwesomeIcon icon={faEyeSlash} /> : <FontAwesomeIcon icon={faEye} />}
            {showCharts ? 'Ocultar Gráficos' : 'Ver Análise Visual'}
          </button>
       </div>

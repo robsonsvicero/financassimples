@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction, Category, CreditCard } from '../types';
-import { Pencil, Trash2, Search, Filter, CreditCard as CreditCardIcon, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencil, faTrash, faSearch, faFilter, faCreditCard, faChevronDown, faChevronUp, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { ICON_MAP, MONTH_NAMES } from '../constants';
 
 interface TransactionsManagerProps {
@@ -170,7 +171,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Busca */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar transação..."
@@ -182,7 +183,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
 
           {/* Filtro por tipo */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <FontAwesomeIcon icon={faFilter} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
@@ -197,13 +198,13 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
           {/* Navegação por mês */}
           <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
             <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-              <ChevronLeft size={20} />
+              <FontAwesomeIcon icon={faChevronLeft} />
             </button>
             <div className="px-2 sm:px-4 py-1 text-center min-w-[120px] sm:min-w-[140px] font-medium text-gray-700 text-sm sm:text-base">
               {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
             </div>
             <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-              <ChevronRight size={20} />
+              <FontAwesomeIcon icon={faChevronRight} />
             </button>
           </div>
         </div>
@@ -230,7 +231,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                       {/* Info Principal */}
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center">
-                          <CreditCardIcon size={20} className="text-violet-600" />
+                          <FontAwesomeIcon icon={faCreditCard} className="text-violet-600" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-gray-800 truncate">
@@ -264,7 +265,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                           className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                           title={isExpanded ? "Recolher" : "Expandir"}
                         >
-                          {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                          {isExpanded ? <FontAwesomeIcon icon={faChevronUp} /> : <FontAwesomeIcon icon={faChevronDown} />}
                         </button>
                       </div>
                     </div>
@@ -307,7 +308,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                                   className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                                   title="Editar"
                                 >
-                                  <Pencil size={14} />
+                                  <FontAwesomeIcon icon={faPencil} />
                                 </button>
                                 <button
                                   onClick={() => {
@@ -318,7 +319,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                                   className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
                                   title="Excluir"
                                 >
-                                  <Trash2 size={14} />
+                                  <FontAwesomeIcon icon={faTrash} />
                                 </button>
                               </div>
                             </div>
@@ -389,7 +390,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Editar"
                       >
-                        <Pencil size={18} />
+                        <FontAwesomeIcon icon={faPencil} />
                       </button>
                       <button
                         onClick={() => {
@@ -400,7 +401,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Excluir"
                       >
-                        <Trash2 size={18} />
+                        <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </div>
                   </div>

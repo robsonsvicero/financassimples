@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { User } from '../types';
-import { Camera, Save, Upload, ZoomIn, ZoomOut, X, Check } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera, faSave, faUpload, faMagnifyingGlassPlus, faMagnifyingGlassMinus, faXmark, faCheck } from '@fortawesome/free-solid-svg-icons';
 
 interface SettingsProps {
   user: User | null;
@@ -145,7 +146,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
              <div className="flex justify-between items-center">
                <h3 className="text-xl font-bold text-gray-800">Ajustar Foto</h3>
                <button onClick={handleCancelEdit} className="p-2 hover:bg-gray-100 rounded-lg">
-                 <X size={20} />
+                 <FontAwesomeIcon icon={faXmark} />
                </button>
              </div>
              
@@ -190,7 +191,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
                      onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
                      className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
                    >
-                     <ZoomOut size={20} />
+                     <FontAwesomeIcon icon={faMagnifyingGlassMinus} />
                    </button>
                    <input
                      type="range"
@@ -205,7 +206,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
                      onClick={() => setZoom(Math.min(3, zoom + 0.1))}
                      className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
                    >
-                     <ZoomIn size={20} />
+                     <FontAwesomeIcon icon={faMagnifyingGlassPlus} />
                    </button>
                    <span className="text-sm text-gray-600 min-w-[50px]">{Math.round(zoom * 100)}%</span>
                  </div>
@@ -228,7 +229,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
                  onClick={handleSaveImage}
                  className="flex-1 py-3 bg-violet-600 text-white rounded-xl font-medium hover:bg-violet-700 transition-colors flex items-center justify-center gap-2"
                >
-                 <Check size={18} />
+                 <FontAwesomeIcon icon={faCheck} />
                  Confirmar
                </button>
              </div>
@@ -256,7 +257,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
                     )}
                   </div>
                   <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Camera className="text-white" size={32} />
+                    <FontAwesomeIcon icon={faCamera} className="text-white text-3xl" />
                   </div>
                 </div>
                 
@@ -273,7 +274,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
                   onClick={triggerFileInput}
                   className="mt-3 text-sm text-violet-600 font-medium cursor-pointer hover:text-violet-800 flex items-center gap-2 bg-transparent border-none"
                 >
-                  <Upload size={16} />
+                  <FontAwesomeIcon icon={faUpload} />
                   Carregar nova foto
                 </button>
              </div>
@@ -290,7 +291,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
              
              <div className="pt-4 border-t border-gray-100">
                <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 text-white rounded-xl font-medium hover:bg-slate-700 transition-all">
-                  <Save size={18} />
+                  <FontAwesomeIcon icon={faSave} />
                   Salvar Alterações
                </button>
                

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction, TransactionType, CreditCard } from '../types';
-import { Download, FileText, CreditCard as CreditCardIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload, faCreditCard, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { MONTH_NAMES } from '../constants';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -175,7 +176,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
             <p className="text-gray-500">Extrato detalhado por período</p>
           </div>
           <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-colors shadow-lg shadow-slate-300/50">
-             <Download size={18} />
+             <FontAwesomeIcon icon={faDownload} />
              Exportar PDF
           </button>
        </div>
@@ -186,13 +187,13 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
                <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Período</label>
                <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
                  <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-                   <ChevronLeft size={20} />
+                   <FontAwesomeIcon icon={faChevronLeft} />
                  </button>
                  <div className="px-2 sm:px-4 py-1 text-center min-w-[120px] sm:min-w-[140px] font-medium text-gray-700 text-sm sm:text-base">
                    {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
                  </div>
                  <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-                   <ChevronRight size={20} />
+                   <FontAwesomeIcon icon={faChevronRight} />
                  </button>
                </div>
              </div>
@@ -203,7 +204,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
              <div className="bg-gray-50 p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center mb-4">
                    <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-                     <FileText size={20} className="text-violet-600" />
+                     <FontAwesomeIcon icon={faCreditCard} className="text-violet-600" />
                      Extrato de Movimentação
                    </h3>
                    <span className="text-sm text-gray-500">
@@ -246,7 +247,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
                            {new Date(invoice.dueDate).toLocaleDateString()}
                          </td>
                          <td className="px-6 py-3 font-medium text-gray-800 flex items-center gap-2">
-                           <CreditCardIcon size={16} className="text-violet-600" />
+                           <FontAwesomeIcon icon={faCreditCard} className="text-violet-600" />
                            FATURA DO CARTÃO {invoice.cardName.toUpperCase()}
                          </td>
                          <td className="px-6 py-3 text-right font-bold text-red-600">

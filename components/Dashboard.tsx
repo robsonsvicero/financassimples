@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Transaction, TransactionType, CreditCard } from '../types';
 import { MONTH_NAMES } from '../constants';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Calendar, Search, Filter, CreditCard as CreditCardIcon } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft, faChevronRight, faArrowTrendUp, faArrowTrendDown, faCalendar, faSearch, faFilter, faCreditCard, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 import { getFinancialTip } from '../services/geminiService';
 
 interface DashboardProps {
@@ -150,13 +151,13 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
 
         <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
            <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-             <ChevronLeft size={20} />
+             <FontAwesomeIcon icon={faChevronLeft} />
            </button>
            <div className="px-2 sm:px-4 py-1 text-center min-w-[120px] sm:min-w-[140px] font-medium text-gray-700 text-sm sm:text-base">
              {viewMode === 'month' && `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
            </div>
            <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-             <ChevronRight size={20} />
+             <FontAwesomeIcon icon={faChevronRight} />
            </button>
         </div>
       </div>
@@ -167,7 +168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-500 font-medium text-sm">Receitas</span>
             <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-              <TrendingUp size={18} />
+              <FontAwesomeIcon icon={faArrowTrendUp} />
             </div>
           </div>
           <h3 className="text-2xl font-bold text-gray-800">
@@ -179,7 +180,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-500 font-medium text-sm">Despesas</span>
             <div className="p-2 bg-red-100 text-red-600 rounded-lg">
-              <TrendingDown size={18} />
+              <FontAwesomeIcon icon={faArrowTrendDown} />
             </div>
           </div>
           <h3 className="text-2xl font-bold text-gray-800">
@@ -191,7 +192,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-500 font-medium text-sm">Saldo</span>
             <div className={`p-2 rounded-lg ${balance >= 0 ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'}`}>
-              <Calendar size={18} />
+              <FontAwesomeIcon icon={faCalendar} />
             </div>
           </div>
           <h3 className={`text-2xl font-bold ${balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
@@ -204,7 +205,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
       {tip && (
         <div className="bg-gradient-to-r from-violet-500 to-fuchsia-600 rounded-xl p-4 text-white shadow-lg flex items-center gap-4">
            <div className="p-2 bg-white/20 rounded-full">
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z"/></svg>
+             <FontAwesomeIcon icon={faWandMagicSparkles} size="lg" />
            </div>
            <div>
              <p className="text-xs font-semibold opacity-80 uppercase tracking-wider">Dica Inteligente</p>
@@ -219,10 +220,10 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
            <h3 className="font-semibold text-gray-700">Transações</h3>
            <div className="flex gap-2">
              <button className="p-2 hover:bg-white rounded-lg transition-colors text-gray-500">
-                <Search size={18} />
+                <FontAwesomeIcon icon={faSearch} />
              </button>
              <button className="p-2 hover:bg-white rounded-lg transition-colors text-gray-500">
-                <Filter size={18} />
+                <FontAwesomeIcon icon={faFilter} />
              </button>
            </div>
         </div>
@@ -265,7 +266,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
                         <td className="px-6 py-4">
                            <div className="flex items-center gap-3">
                              <div className={`w-8 h-8 rounded-full ${invoice.cardColor} flex items-center justify-center text-white`}>
-                               <CreditCardIcon size={14} />
+                               <FontAwesomeIcon icon={faCreditCard} />
                              </div>
                              <div>
                                <p className="font-medium text-gray-800">FATURA DO CARTÃO {invoice.cardName.toUpperCase()}</p>
@@ -309,7 +310,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
                       <td className="px-6 py-4">
                          <div className="flex items-center gap-3">
                            <div className={`w-8 h-8 rounded-full ${isExpense ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-500'} flex items-center justify-center`}>
-                              {isExpense ? <TrendingDown size={16} /> : <TrendingUp size={16} />}
+                              {isExpense ? <FontAwesomeIcon icon={faArrowTrendDown} /> : <FontAwesomeIcon icon={faArrowTrendUp} />}
                            </div>
                            <div>
                              <p className="font-medium text-gray-800">{transaction.description}</p>
