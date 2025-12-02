@@ -263,20 +263,17 @@ export const listAllUsers = async (): Promise<User[]> => {
 export const deleteUser = async (userId: string) => {
   const client = checkSupabase();
   
-  // Deleta transações do usuário
+  // Deleta dados do usuário (ignora erros - podem não existir registros)
   await client.from('transactions').delete().eq('user_id', userId);
-  
-  // Deleta cartões do usuário
   await client.from('cards').delete().eq('user_id', userId);
-  
-  // Deleta categorias do usuário
   await client.from('categories').delete().eq('user_id', userId);
-  
-  // Deleta orçamentos do usuário
   await client.from('budgets').delete().eq('user_id', userId);
   
-  // Deleta perfil do usuário
-  const { error } = await client.from('profiles').delete().eq('id', userId);
+  // Deleta perfil do usuário (o trigger vai deletar da auth automaticamente)
+  const { error: profileError } = await client.from('profiles').delete().eq('id', userId);
   
-  if (error) throw error;
+  if (profileError) {
+    console.error('Erro ao deletar profile:', profileError);
+    throw new Error(`Erro ao deletar usuário: ${profileError.message}`);
+  }
 };
