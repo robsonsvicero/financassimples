@@ -40,12 +40,23 @@ const App: React.FC = () => {
     }, 3000);
     
     if (supabase) {
-      // Verifica sessão inicial
+      // Verifica sessão inicial com timeout
       const checkInitialSession = async () => {
         try {
           if (!supabase) return;
           console.log('[checkInitialSession] Verificando sessão...');
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          
+          // Adiciona timeout de 5 segundos
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout ao buscar sessão')), 5000)
+          );
+          
+          const { data: { session }, error: sessionError } = await Promise.race([
+            sessionPromise,
+            timeoutPromise
+          ]) as any;
+          
           console.log('[checkInitialSession] Sessão:', session?.user?.email, 'Erro:', sessionError);
           if (!isMounted) return;
           
@@ -76,6 +87,7 @@ const App: React.FC = () => {
           }
         } catch (error) {
           console.error('[checkInitialSession] Erro:', error);
+          // Se der timeout, deixa o onAuthStateChange lidar com isso
         }
       };
       
