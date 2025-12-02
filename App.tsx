@@ -42,29 +42,40 @@ const App: React.FC = () => {
     if (supabase) {
       // Verifica sessão inicial
       const checkInitialSession = async () => {
-        if (!supabase) return;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
-        
-        if (session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+        try {
+          if (!supabase) return;
+          console.log('[checkInitialSession] Verificando sessão...');
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          console.log('[checkInitialSession] Sessão:', session?.user?.email, 'Erro:', sessionError);
+          if (!isMounted) return;
           
-          const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
-          
-          const user: User = {
-            id: session.user.id,
-            email: session.user.email!,
-            name: profile?.name || session.user.user_metadata?.name || 'Usuário',
-            avatar: profile?.avatar_url,
-            isAdmin
-          };
-          
-          setCurrentUser(user);
-          loadData(user.id).catch(console.error);
+          if (session?.user) {
+            console.log('[checkInitialSession] Buscando profile...');
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            console.log('[checkInitialSession] Profile:', profile, 'Erro:', profileError);
+            
+            const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
+            
+            const user: User = {
+              id: session.user.id,
+              email: session.user.email!,
+              name: profile?.name || session.user.user_metadata?.name || 'Usuário',
+              avatar: profile?.avatar_url,
+              isAdmin
+            };
+            
+            console.log('[checkInitialSession] Usuário construído:', user);
+            setCurrentUser(user);
+            loadData(user.id).catch(console.error);
+          } else {
+            console.log('[checkInitialSession] Sem sessão ativa');
+          }
+        } catch (error) {
+          console.error('[checkInitialSession] Erro:', error);
         }
       };
       
