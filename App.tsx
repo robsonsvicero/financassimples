@@ -33,14 +33,44 @@ const App: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     
-    // Simplificado: só desliga loading após 10 segundos ou quando auth mudar
     const loadingTimeout = setTimeout(() => {
       if (isMounted && isLoading) {
         setIsLoading(false);
       }
     }, 3000);
-    // Listen for auth changes
+    
     if (supabase) {
+      // Verifica sessão inicial
+      const checkInitialSession = async () => {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
+          
+          const user: User = {
+            id: session.user.id,
+            email: session.user.email!,
+            name: profile?.name || session.user.user_metadata?.name || 'Usuário',
+            avatar: profile?.avatar_url,
+            isAdmin
+          };
+          
+          setCurrentUser(user);
+          loadData(user.id).catch(console.error);
+        }
+      };
+      
+      checkInitialSession();
+      
+      // Listen for auth changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
         if (!isMounted || !supabase) return;
         
