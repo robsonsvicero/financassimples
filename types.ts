@@ -54,6 +54,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  isAdmin?: boolean;
 }
 
 export interface Budget {

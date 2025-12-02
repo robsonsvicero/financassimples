@@ -32,15 +32,24 @@ const Layout: React.FC<LayoutProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [isMobileMenuOpen]);
   
-  const navItems = React.useMemo(() => [
-    { id: 'dashboard', label: 'Painel', icon: faChartLine },
-    { id: 'transactions', label: 'Transações', icon: faFileAlt },
-    { id: 'cards', label: 'Cartões', icon: faCreditCard },
-    { id: 'categories', label: 'Categorias', icon: faChartPie },
-    { id: 'budget', label: 'Orçamento', icon: faChartPie },
-    { id: 'reports', label: 'Relatórios', icon: faFileAlt },
-    { id: 'settings', label: 'Config.', icon: faGear },
-  ], []);
+  const navItems = React.useMemo(() => {
+    const items = [
+      { id: 'dashboard', label: 'Painel', icon: faChartLine },
+      { id: 'transactions', label: 'Transações', icon: faFileAlt },
+      { id: 'cards', label: 'Cartões', icon: faCreditCard },
+      { id: 'categories', label: 'Categorias', icon: faChartPie },
+      { id: 'budget', label: 'Orçamento', icon: faChartPie },
+      { id: 'reports', label: 'Relatórios', icon: faFileAlt },
+      { id: 'settings', label: 'Config.', icon: faGear },
+    ];
+    
+    // Adiciona menu de usuários apenas para admin
+    if (user?.isAdmin) {
+      items.splice(items.length - 1, 0, { id: 'users', label: 'Usuários', icon: faUser });
+    }
+    
+    return items;
+  }, [user]);
 
   const handleMobileNav = React.useCallback((tab: string) => {
     setActiveTab(tab);

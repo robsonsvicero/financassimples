@@ -24,11 +24,14 @@ export const getCurrentUser = async (): Promise<User | null> => {
     .eq('id', session.user.id)
     .single();
 
+  const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
+
   return {
     id: session.user.id,
     email: session.user.email!,
     name: profile?.name || session.user.user_metadata?.name || 'Usuário',
-    avatar: profile?.avatar_url
+    avatar: profile?.avatar_url,
+    isAdmin
   };
 };
 
@@ -225,6 +228,49 @@ export const updateUserProfile = async (userId: string, name: string, avatar: st
     name,
     avatar_url: avatar
   }).eq('id', userId);
+  
+  if (error) throw error;
+};
+
+// --- Admin Functions ---
+
+export const listAllUsers = async (): Promise<User[]> => {
+  const client = checkSupabase();
+  
+  // Busca todos os perfis
+  const { data: profiles, error } = await client
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  
+  return (profiles || []).map(profile => ({
+    id: profile.id,
+    email: profile.email || 'Email não disponível',
+    name: profile.name || 'Usuário',
+    avatar: profile.avatar_url,
+    isAdmin: profile.email === 'robsonsvicero@outlook.com'
+  }));
+};
+
+export const deleteUser = async (userId: string) => {
+  const client = checkSupabase();
+  
+  // Deleta transações do usuário
+  await client.from('transactions').delete().eq('user_id', userId);
+  
+  // Deleta cartões do usuário
+  await client.from('cards').delete().eq('user_id', userId);
+  
+  // Deleta categorias do usuário
+  await client.from('categories').delete().eq('user_id', userId);
+  
+  // Deleta orçamentos do usuário
+  await client.from('budgets').delete().eq('user_id', userId);
+  
+  // Deleta perfil do usuário
+  const { error } = await client.from('profiles').delete().eq('id', userId);
   
   if (error) throw error;
 };

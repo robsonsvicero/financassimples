@@ -7,6 +7,7 @@ import CreditCards from './components/CreditCards';
 import BudgetAnalysis from './components/BudgetAnalysis';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
+import UserManagement from './components/UserManagement';
 import Auth from './components/Auth';
 import LoadingScreen from './components/LoadingScreen';
 import TransactionsManager from './components/TransactionsManager';
@@ -339,6 +340,8 @@ const App: React.FC = () => {
         );
       case 'reports':
         return <Reports transactions={transactions} cards={cards} />;
+      case 'users':
+        return currentUser ? <UserManagement currentUser={currentUser} /> : null;
       case 'settings':
         return <Settings user={currentUser} onUpdateUser={handleUpdateUser} />;
       default:
