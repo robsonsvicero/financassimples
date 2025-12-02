@@ -40,61 +40,9 @@ const App: React.FC = () => {
     }, 3000);
     
     if (supabase) {
-      // Verifica sessão inicial com timeout
-      const checkInitialSession = async () => {
-        try {
-          if (!supabase) return;
-          console.log('[checkInitialSession] Verificando sessão...');
-          
-          // Adiciona timeout de 5 segundos
-          const sessionPromise = supabase.auth.getSession();
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout ao buscar sessão')), 5000)
-          );
-          
-          const { data: { session }, error: sessionError } = await Promise.race([
-            sessionPromise,
-            timeoutPromise
-          ]) as any;
-          
-          console.log('[checkInitialSession] Sessão:', session?.user?.email, 'Erro:', sessionError);
-          if (!isMounted) return;
-          
-          if (session?.user) {
-            console.log('[checkInitialSession] Buscando profile...');
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-            console.log('[checkInitialSession] Profile:', profile, 'Erro:', profileError);
-            
-            const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
-            
-            const user: User = {
-              id: session.user.id,
-              email: session.user.email!,
-              name: profile?.name || session.user.user_metadata?.name || 'Usuário',
-              avatar: profile?.avatar_url,
-              isAdmin
-            };
-            
-            console.log('[checkInitialSession] Usuário construído:', user);
-            setCurrentUser(user);
-            loadData(user.id).catch(console.error);
-          } else {
-            console.log('[checkInitialSession] Sem sessão ativa');
-          }
-        } catch (error) {
-          console.error('[checkInitialSession] Erro:', error);
-          // Se der timeout, deixa o onAuthStateChange lidar com isso
-        }
-      };
-      
-      checkInitialSession();
-      
-      // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      // Listen for auth changes (incluindo sessão inicial)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('[onAuthStateChange] Evento:', event, 'Email:', session?.user?.email);
         if (!isMounted || !supabase) return;
         
         if (session?.user) {
