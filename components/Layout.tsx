@@ -177,6 +177,20 @@ const Layout: React.FC<LayoutProps> = ({
              </div>
           </div>
 
+          {/* Botão Novo Lançamento Mobile */}
+          <div className="px-6 py-4">
+            <button 
+              onClick={() => {
+                onOpenNewTransaction();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 font-semibold"
+            >
+              <span className="text-xl">+</span>
+              Novo Lançamento
+            </button>
+          </div>
+
           <nav className="flex-1 px-4 py-4 overflow-y-auto">
             <ul className="space-y-1">
               {navItems.map((item) => {

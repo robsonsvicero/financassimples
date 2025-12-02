@@ -34,8 +34,7 @@ const App: React.FC = () => {
       if (isMounted && isLoading) {
         setIsLoading(false);
       }
-    }, 50000);
-
+    }, 3000);
     // Listen for auth changes
     if (supabase) {
       // Força verificação inicial
@@ -53,12 +52,12 @@ const App: React.FC = () => {
           } else {
             setCurrentUser(null);
           }
-          setIsLoading(false);
+          // Não desliga o loading aqui - deixa o timeout controlar
         }
       }).catch(() => {
         if (isMounted) {
           setCurrentUser(null);
-          setIsLoading(false);
+          // Não desliga o loading aqui - deixa o timeout controlar
         }
       });
 
