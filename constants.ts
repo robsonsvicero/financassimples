@@ -39,4 +39,5 @@ export const MONTH_NAMES = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-export const APP_LOGO = "./src/images/logo_app.png";
+import logoApp from './src/images/logo_app.png';
+export const APP_LOGO = logoApp;
