@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Transaction, TransactionType, CreditCard } from '../types';
 import { Download, FileText, CreditCard as CreditCardIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MONTH_NAMES } from '../constants';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface ReportsProps {
   transactions: Transaction[];
@@ -107,6 +109,64 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
     }, 0);
   }, [displayItems]);
 
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Título
+    doc.setFontSize(18);
+    doc.text('Relatório Financeiro', 14, 22);
+    
+    // Período
+    doc.setFontSize(12);
+    const monthName = MONTH_NAMES[currentDate.getMonth()];
+    const year = currentDate.getFullYear();
+    doc.text(`Período: ${monthName} ${year}`, 14, 32);
+    
+    // Resumo
+    doc.setFontSize(10);
+    doc.text(`Entradas: R$ ${totalIn.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, 42);
+    doc.text(`Saídas: R$ ${totalOut.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, 48);
+    doc.text(`Resultado: R$ ${(totalIn - totalOut).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, 54);
+    
+    // Tabela de transações
+    const tableData = displayItems.map(item => {
+      if ('type' in item && item.type === 'invoice') {
+        return [
+          item.dueDate.split('-').reverse().join('/'),
+          item.cardName,
+          'Fatura Cartão',
+          `R$ ${item.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+          '-'
+        ];
+      } else {
+        const transaction = item as Transaction;
+        return [
+          transaction.date.split('-').reverse().join('/'),
+          transaction.description,
+          transaction.type === TransactionType.INCOME ? 'Receita' : 'Despesa',
+          transaction.type === TransactionType.INCOME 
+            ? `R$ ${transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+            : '-',
+          transaction.type === TransactionType.EXPENSE
+            ? `R$ ${transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+            : '-'
+        ];
+      }
+    });
+    
+    autoTable(doc, {
+      startY: 60,
+      head: [['Data', 'Descrição', 'Tipo', 'Entrada', 'Saída']],
+      body: tableData,
+      theme: 'striped',
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [30, 41, 59] }
+    });
+    
+    // Salvar
+    doc.save(`relatorio-${selectedMonth}.pdf`);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
        <div className="flex justify-between items-end">
@@ -114,7 +174,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
             <h2 className="text-2xl font-bold text-gray-800">Relatórios</h2>
             <p className="text-gray-500">Extrato detalhado por período</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-colors shadow-lg shadow-slate-300/50">
+          <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-colors shadow-lg shadow-slate-300/50">
              <Download size={18} />
              Exportar PDF
           </button>
