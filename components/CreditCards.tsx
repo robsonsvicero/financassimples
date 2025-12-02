@@ -8,9 +8,10 @@ interface CreditCardsProps {
   onAddCard: (card: CreditCard) => void;
   onEditCard: (card: CreditCard) => void;
   onDeleteCard: (id: string) => void;
+  onUpdateMultipleTransactions: (transactions: Transaction[]) => void;
 }
 
-const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCard, onEditCard, onDeleteCard }) => {
+const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCard, onEditCard, onDeleteCard, onUpdateMultipleTransactions }) => {
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formCard, setFormCard] = useState<Partial<CreditCard>>({ color: 'bg-slate-800' });
@@ -239,12 +240,28 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
                   <button
                     onClick={() => {
                       const allPaid = cardTransactions.every(t => t.isPaid);
-                      if (window.confirm(allPaid ? 'Desmarcar todas as transações desta fatura como pagas?' : 'Marcar todas as transações desta fatura como pagas?')) {
-                        // TODO: Implementar atualização em massa
-                        alert('Funcionalidade em desenvolvimento');
+                      const newStatus = !allPaid;
+                      const message = newStatus 
+                        ? 'Marcar todas as transações desta fatura como pagas?' 
+                        : 'Desmarcar todas as transações desta fatura como pagas?';
+                      
+                      if (window.confirm(message)) {
+                        // Atualiza o status isPaid de todas as transações da fatura
+                        const updatedTransactions = transactions.map(t => {
+                          const isInvoiceTransaction = cardTransactions.some(ct => ct.id === t.id);
+                          if (isInvoiceTransaction) {
+                            return { ...t, isPaid: newStatus };
+                          }
+                          return t;
+                        });
+                        onUpdateMultipleTransactions(updatedTransactions);
                       }
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors text-sm font-semibold"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors text-sm font-semibold ${
+                      cardTransactions.every(t => t.isPaid) 
+                        ? 'bg-gray-500 text-white hover:bg-gray-600' 
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
                   >
                     {cardTransactions.every(t => t.isPaid) ? '✓ Fatura Paga' : 'Marcar Fatura como Paga'}
                   </button>

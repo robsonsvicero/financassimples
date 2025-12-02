@@ -212,6 +212,23 @@ const App: React.FC = () => {
     }
   };
 
+  const handleUpdateMultipleTransactions = async (updatedTransactions: Transaction[]) => {
+    try {
+      // Atualiza o estado local primeiro
+      setTransactions(updatedTransactions);
+      
+      // Atualiza cada transação no banco de dados
+      await Promise.all(
+        updatedTransactions.map(transaction => ApiService.updateTransaction(transaction))
+      );
+    } catch (error) {
+      console.error("Error updating transactions", error);
+      alert("Erro ao atualizar transações");
+      // Recarrega os dados em caso de erro
+      if (currentUser) loadData(currentUser.id);
+    }
+  };
+
   const handleDeleteTransaction = async (id: string) => {
     try {
       setTransactions(prev => prev.filter(t => t.id !== id));
@@ -287,6 +304,7 @@ const App: React.FC = () => {
             onAddCard={handleAddCard}
             onEditCard={handleEditCard}
             onDeleteCard={handleDeleteCard}
+            onUpdateMultipleTransactions={handleUpdateMultipleTransactions}
           />
         );
       case 'budget':

@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({
                Finanças<span className="font-light text-gray-600">$imples</span>
              </h1>
           </div>
-          <p className="text-xs text-gray-400 mt-1 pl-10">criado por Robson Svicero-Design</p>
+          <p className="text-xs text-gray-400 mt-1 pl-10">Criado por <a href="https://robsonsvicero.com.br" target="_blank" rel="noopener noreferrer" className="text-[#800020] font-bold inline-block transform transition duration-500 hover:scale-110">Robson Svicero-Design</a></p>
         </div>
 
         {/* User Profile */}
