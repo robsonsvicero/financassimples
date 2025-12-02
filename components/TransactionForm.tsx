@@ -6,13 +6,15 @@ interface TransactionFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (transactions: Transaction[]) => void;
+  editingTransaction?: Transaction | null;
+  onUpdate?: (transaction: Transaction) => void;
   cards: CreditCard[];
   categories: Category[];
   onAddCategory: (category: Category) => void;
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ 
-  isOpen, onClose, onSave, cards, categories 
+  isOpen, onClose, onSave, editingTransaction, onUpdate, cards, categories 
 }) => {
   const [type, setType] = useState<TransactionType>(TransactionType.EXPENSE);
   const [description, setDescription] = useState('');
@@ -23,17 +25,38 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const [selectedCardId, setSelectedCardId] = useState('');
   const [installments, setInstallments] = useState(1);
   const [expenseType, setExpenseType] = useState<ExpenseType>(ExpenseType.VARIABLE);
+  const [isPaid, setIsPaid] = useState(false);
   
-  // Reset form when opened
+  // Reset or load form when opened
   useEffect(() => {
     if (isOpen) {
-      setDescription('');
-      setAmount('');
-      setDate(new Date().toISOString().split('T')[0]);
-      setInstallments(1);
-      setCategoryId(categories[0]?.id || '');
+      if (editingTransaction) {
+        // Carregar dados da transação para edição
+        setType(editingTransaction.type);
+        setDescription(editingTransaction.description);
+        setAmount(editingTransaction.amount.toString());
+        setDate(editingTransaction.date);
+        setCategoryId(editingTransaction.category);
+        setPaymentMethod(editingTransaction.paymentMethod);
+        setSelectedCardId(editingTransaction.creditCardId || '');
+        setExpenseType(editingTransaction.expenseType || ExpenseType.VARIABLE);
+        setIsPaid(editingTransaction.isPaid);
+        setInstallments(1); // Não permitir edição de parcelas
+      } else {
+        // Limpar formulário para nova transação
+        setType(TransactionType.EXPENSE);
+        setDescription('');
+        setAmount('');
+        setDate(new Date().toISOString().split('T')[0]);
+        setInstallments(1);
+        setCategoryId(categories[0]?.id || '');
+        setPaymentMethod(PaymentMethod.DEBIT);
+        setSelectedCardId('');
+        setExpenseType(ExpenseType.VARIABLE);
+        setIsPaid(false);
+      }
     }
-  }, [isOpen, categories]);
+  }, [isOpen, editingTransaction, categories]);
 
   if (!isOpen) return null;
 
@@ -42,6 +65,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     if (!amount || !description || !categoryId) return;
 
     const numAmount = parseFloat(amount.replace(',', '.')); // Handle PT-BR decimal
+    
+    // Se estiver editando, atualizar a transação existente
+    if (editingTransaction && onUpdate) {
+      const updatedTransaction: Transaction = {
+        ...editingTransaction,
+        description,
+        amount: numAmount,
+        date,
+        category: categoryId,
+        paymentMethod,
+        creditCardId: paymentMethod === PaymentMethod.CREDIT ? selectedCardId : undefined,
+        expenseType: type === TransactionType.EXPENSE ? expenseType : undefined,
+        isPaid,
+      };
+      onUpdate(updatedTransaction);
+      onClose();
+      return;
+    }
+
     const transactionsToAdd: Transaction[] = [];
 
     // Calculate Due Date Logic for Credit Card
@@ -49,22 +91,30 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
        const card = cards.find(c => c.id === cardId);
        if (!card) return purchaseDateStr;
 
-       const pDate = new Date(purchaseDateStr);
+       const pDate = new Date(purchaseDateStr + 'T12:00:00');
        const purchaseDay = pDate.getDate();
        
        let targetMonth = pDate.getMonth();
        let targetYear = pDate.getFullYear();
 
-       // Billing Cycle Logic
+       // Billing Cycle Logic: se a compra foi DEPOIS do fechamento, vai para o próximo mês
        if (purchaseDay > card.closingDay) {
-          // Next month's bill
-          targetMonth += 1; 
+          targetMonth += 1;
        }
        
-       // Add installment offset
+       // Add installment offset (cada parcela vence em um mês diferente)
        targetMonth += monthOffset;
 
        // Adjust for year rollover
+       while (targetMonth > 11) {
+         targetMonth -= 12;
+         targetYear += 1;
+       }
+       while (targetMonth < 0) {
+         targetMonth += 12;
+         targetYear -= 1;
+       }
+
        const targetDate = new Date(targetYear, targetMonth, card.dueDay);
        return targetDate.toISOString().split('T')[0];
     };
@@ -101,6 +151,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
        }
     } else {
       // Normal Transaction
+      // Auto-marcar como pago se for dinheiro, débito, PIX ou receita
+      const autoPaid = type === TransactionType.INCOME || 
+                       paymentMethod === PaymentMethod.CASH || 
+                       paymentMethod === PaymentMethod.DEBIT || 
+                       paymentMethod === PaymentMethod.PIX;
+      
       transactionsToAdd.push({
         id: Math.random().toString(36).substr(2, 9),
         description,
@@ -110,7 +166,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         expenseType: type === TransactionType.EXPENSE ? expenseType : undefined,
         category: categoryId,
         paymentMethod,
-        isPaid: type === TransactionType.INCOME // Income auto paid usually, or add toggle
+        isPaid: autoPaid
       });
     }
 
@@ -237,8 +293,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                {/* Payment Method */}
                <div>
                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Método de Pagamento</label>
-                 <div className="grid grid-cols-3 gap-2">
-                    {[PaymentMethod.CASH, PaymentMethod.DEBIT, PaymentMethod.CREDIT].map(m => (
+                 <div className="grid grid-cols-4 gap-2">
+                    {[PaymentMethod.CASH, PaymentMethod.DEBIT, PaymentMethod.PIX, PaymentMethod.CREDIT].map(m => (
                       <button
                         key={m}
                         type="button"
@@ -249,7 +305,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                           : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                         }`}
                       >
-                        {m === 'CASH' ? 'Dinheiro' : m === 'DEBIT' ? 'Débito' : 'Crédito'}
+                        {m === 'CASH' ? 'Dinheiro' : m === 'DEBIT' ? 'Débito' : m === 'PIX' ? 'PIX' : 'Crédito'}
                       </button>
                     ))}
                  </div>
@@ -291,6 +347,21 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                         * O valor será dividido e as datas de vencimento ajustadas automaticamente.
                       </p>
                     )}
+                    
+                    {/* Marcar como Pago (para faturas de crédito) */}
+                    {editingTransaction && (
+                      <div className="pt-2">
+                        <label className="flex items-center gap-2 text-sm text-violet-700">
+                          <input
+                            type="checkbox"
+                            checked={isPaid}
+                            onChange={(e) => setIsPaid(e.target.checked)}
+                            className="rounded text-violet-600 focus:ring-violet-500"
+                          />
+                          Marcar como pago
+                        </label>
+                      </div>
+                    )}
                  </div>
                )}
 
@@ -301,7 +372,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
              type="submit" 
              className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all active:scale-[0.98]"
            >
-             Salvar Lançamento
+             {editingTransaction ? 'Atualizar Lançamento' : 'Salvar Lançamento'}
            </button>
         </form>
       </div>

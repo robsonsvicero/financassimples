@@ -143,6 +143,38 @@ export const deleteTransaction = async (id: string) => {
   if (error) throw error;
 };
 
+export const updateTransaction = async (transaction: Transaction) => {
+  const client = checkSupabase();
+  
+  const dbPayload: any = {
+    amount: transaction.amount,
+    description: transaction.description,
+    date: transaction.date,
+    type: transaction.type,
+    payment_method: transaction.paymentMethod,
+    is_paid: transaction.isPaid || false
+  };
+
+  if (transaction.dueDate) {
+    dbPayload.due_date = transaction.dueDate;
+  }
+
+  if (transaction.category) {
+    dbPayload.category_id = transaction.category;
+  }
+
+  if (transaction.creditCard) {
+    dbPayload.credit_card_id = transaction.creditCard;
+  }
+
+  const { error } = await client
+    .from('transactions')
+    .update(dbPayload)
+    .eq('id', transaction.id);
+    
+  if (error) throw error;
+};
+
 export const addCard = async (card: CreditCard, userId: string) => {
   const client = checkSupabase();
   const { data, error } = await client.from('credit_cards').insert({

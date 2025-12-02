@@ -11,14 +11,15 @@ import Auth from './components/Auth';
 import LoadingScreen from './components/LoadingScreen';
 import TransactionsManager from './components/TransactionsManager';
 import CategoriesManager from './components/CategoriesManager';
-import * as ApiService from './services/api';
 import { supabase } from './services/supabaseClient';
+import * as ApiService from './services/api';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isTransactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [authError, setAuthError] = useState('');
   
   // App Data State
@@ -201,6 +202,16 @@ const App: React.FC = () => {
     }
   };
 
+  const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
+    try {
+      setTransactions(prev => prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
+      await ApiService.updateTransaction(updatedTransaction);
+    } catch (error) {
+      console.error("Error updating transaction", error);
+      alert("Erro ao atualizar transação");
+    }
+  };
+
   const handleDeleteTransaction = async (id: string) => {
     try {
       setTransactions(prev => prev.filter(t => t.id !== id));
@@ -286,9 +297,9 @@ const App: React.FC = () => {
             transactions={transactions}
             categories={categories}
             cards={cards}
-            onEdit={() => {
-              // TODO: Implementar edição de transação
-              alert('Funcionalidade de edição em desenvolvimento');
+            onEdit={(t) => {
+              setEditingTransaction(t);
+              setTransactionModalOpen(true);
             }}
             onDelete={handleDeleteTransaction}
           />
@@ -348,8 +359,13 @@ const App: React.FC = () => {
       
       <TransactionForm 
         isOpen={isTransactionModalOpen}
-        onClose={() => setTransactionModalOpen(false)}
+        onClose={() => {
+          setTransactionModalOpen(false);
+          setEditingTransaction(null);
+        }}
         onSave={handleSaveTransactions}
+        editingTransaction={editingTransaction}
+        onUpdate={handleUpdateTransaction}
         cards={cards}
         categories={categories}
         onAddCategory={(cat) => setCategories(prev => [...prev, cat])}

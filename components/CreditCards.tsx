@@ -15,6 +15,7 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
   const [isEditing, setIsEditing] = useState(false);
   const [formCard, setFormCard] = useState<Partial<CreditCard>>({ color: 'bg-slate-800' });
   const [selectedCardId, setSelectedCardId] = useState<string | null>(cards[0]?.id || null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
 
   const handleOpenAddForm = () => {
     setFormCard({ color: 'bg-slate-800' });
@@ -57,16 +58,37 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
     }
   };
 
-  const getTransactionsForCard = (cardId: string) => {
-    const card = cards.find(c => c.id === cardId);
-    if (!card) return [];
-    return transactions.filter(t => t.creditCardId === cardId).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const getTransactionsForCard = (cardId: string, month: string) => {
+    // month no formato YYYY-MM
+    return transactions.filter(t => {
+      if (t.creditCardId !== cardId) return false;
+      // Filtrar por mês de VENCIMENTO (dueDate)
+      if (t.dueDate) {
+        return t.dueDate.startsWith(month);
+      }
+      return false;
+    }).sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   };
 
   const selectedCard = cards.find(c => c.id === selectedCardId);
-  const cardTransactions = selectedCardId ? getTransactionsForCard(selectedCardId) : [];
+  const cardTransactions = selectedCardId ? getTransactionsForCard(selectedCardId, selectedMonth) : [];
   
   const totalInvoice = cardTransactions.reduce((acc, t) => acc + t.amount, 0);
+
+  // Gerar opções de mês (6 meses no passado e 6 no futuro)
+  const generateMonthOptions = () => {
+    const options = [];
+    const today = new Date();
+    for (let i = -6; i <= 6; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+      const value = d.toISOString().slice(0, 7);
+      const label = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      options.push({ value, label: label.charAt(0).toUpperCase() + label.slice(1) });
+    }
+    return options;
+  };
+
+  const monthOptions = generateMonthOptions();
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -164,33 +186,70 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
        {/* Details Area */}
        {selectedCard && (
          <div className="glass-card rounded-2xl overflow-hidden mt-6">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white/40">
-              <div className="flex-1">
-                 <div className="flex items-center gap-3">
-                   <h3 className="font-bold text-lg text-gray-800">Fatura Detalhada - {selectedCard.name}</h3>
-                   <div className="flex gap-1">
-                      <button 
-                        onClick={() => handleOpenEditForm(selectedCard)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
-                        title="Editar Cartão"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(selectedCard.id)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Excluir Cartão"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+            <div className="p-6 border-b border-gray-100 bg-white/40">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex-1">
+                   <div className="flex items-center gap-3">
+                     <h3 className="font-bold text-lg text-gray-800">Fatura - {selectedCard.name}</h3>
+                     <div className="flex gap-1">
+                        <button 
+                          onClick={() => handleOpenEditForm(selectedCard)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
+                          title="Editar Cartão"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(selectedCard.id)}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Excluir Cartão"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                     </div>
                    </div>
-                 </div>
-                 <p className="text-sm text-gray-500">Transações recentes vinculadas a este cartão</p>
+                   <p className="text-sm text-gray-500">Selecione o mês para ver a fatura</p>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  {/* Seletor de Mês */}
+                  <div>
+                    <select
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(e.target.value)}
+                      className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 outline-none text-sm font-medium text-gray-700"
+                    >
+                      {monthOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Total da Fatura */}
+                  <div className="text-right pl-4 border-l border-gray-200">
+                    <p className="text-xs text-gray-500 uppercase">Total da Fatura</p>
+                    <p className="text-2xl font-bold text-slate-800">R$ {totalInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-right pl-4">
-                <p className="text-xs text-gray-500 uppercase">Total Estimado</p>
-                <p className="text-xl font-bold text-slate-800">R$ {totalInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-              </div>
+              
+              {/* Botão Marcar Fatura como Paga */}
+              {cardTransactions.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      const allPaid = cardTransactions.every(t => t.isPaid);
+                      if (window.confirm(allPaid ? 'Desmarcar todas as transações desta fatura como pagas?' : 'Marcar todas as transações desta fatura como pagas?')) {
+                        // TODO: Implementar atualização em massa
+                        alert('Funcionalidade em desenvolvimento');
+                      }
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors text-sm font-semibold"
+                  >
+                    {cardTransactions.every(t => t.isPaid) ? '✓ Fatura Paga' : 'Marcar Fatura como Paga'}
+                  </button>
+                </div>
+              )}
             </div>
             
             <div className="p-0">
