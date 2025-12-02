@@ -163,8 +163,8 @@ export const updateTransaction = async (transaction: Transaction) => {
     dbPayload.category_id = transaction.category;
   }
 
-  if (transaction.creditCard) {
-    dbPayload.credit_card_id = transaction.creditCard;
+  if (transaction.creditCardId) {
+    dbPayload.credit_card_id = transaction.creditCardId;
   }
 
   const { error } = await client
