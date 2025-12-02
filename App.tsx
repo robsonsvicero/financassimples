@@ -50,29 +50,55 @@ const App: React.FC = () => {
         
         if (session?.user) {
           console.log('[onAuthStateChange] Buscando profile para:', session.user.id);
-          // Busca profile separadamente
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
           
-          console.log('[onAuthStateChange] Profile:', profile, 'Erro:', profileError);
-          
-          const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
-          
-          const user: User = {
-            id: session.user.id,
-            email: session.user.email!,
-            name: profile?.name || session.user.user_metadata?.name || 'Usuário',
-            avatar: profile?.avatar_url,
-            isAdmin
-          };
-          
-          console.log('[onAuthStateChange] User construído:', user);
-          setCurrentUser(user);
-          console.log('[onAuthStateChange] Carregando dados...');
-          loadData(user.id).catch(console.error);
+          try {
+            // Busca profile com timeout
+            const profilePromise = supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout ao buscar profile')), 3000)
+            );
+            
+            const { data: profile, error: profileError } = await Promise.race([
+              profilePromise,
+              timeoutPromise
+            ]) as any;
+            
+            console.log('[onAuthStateChange] Profile:', profile, 'Erro:', profileError);
+            
+            const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
+            
+            const user: User = {
+              id: session.user.id,
+              email: session.user.email!,
+              name: profile?.name || session.user.user_metadata?.name || 'Usuário',
+              avatar: profile?.avatar_url,
+              isAdmin
+            };
+            
+            console.log('[onAuthStateChange] User construído:', user);
+            setCurrentUser(user);
+            console.log('[onAuthStateChange] Carregando dados...');
+            loadData(user.id).catch(console.error);
+          } catch (error) {
+            console.error('[onAuthStateChange] Erro ao buscar profile:', error);
+            // Cria usuário mesmo sem profile
+            const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
+            const user: User = {
+              id: session.user.id,
+              email: session.user.email!,
+              name: session.user.user_metadata?.name || 'Usuário',
+              avatar: session.user.user_metadata?.avatar_url,
+              isAdmin
+            };
+            console.log('[onAuthStateChange] User construído (fallback):', user);
+            setCurrentUser(user);
+            loadData(user.id).catch(console.error);
+          }
         } else {
           console.log('[onAuthStateChange] Sem sessão - limpando dados');
           setCurrentUser(null);
