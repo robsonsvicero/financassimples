@@ -1,21 +1,106 @@
-import React, { useState } from 'react';
-import { Transaction, TransactionType } from '../types';
-import { Download, FileText } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Transaction, TransactionType, CreditCard } from '../types';
+import { Download, FileText, CreditCard as CreditCardIcon } from 'lucide-react';
 
 interface ReportsProps {
   transactions: Transaction[];
+  cards: CreditCard[];
 }
 
-const Reports: React.FC<ReportsProps> = ({ transactions }) => {
-  const [startDate, setStartDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+interface InvoiceGroup {
+  id: string;
+  type: 'invoice';
+  cardName: string;
+  dueDate: string;
+  amount: number;
+}
 
-  const filtered = transactions.filter(t => {
-     return t.date >= startDate && t.date <= endDate;
-  }).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+type DisplayItem = Transaction | InvoiceGroup;
 
-  const totalIn = filtered.filter(t => t.type === TransactionType.INCOME).reduce((acc, t) => acc + t.amount, 0);
-  const totalOut = filtered.filter(t => t.type === TransactionType.EXPENSE).reduce((acc, t) => acc + t.amount, 0);
+const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
+  // Obtém o mês atual no formato YYYY-MM
+  const getCurrentMonth = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  };
+
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+
+  const displayItems = useMemo(() => {
+    // Filtra transações pelo mês selecionado
+    const filtered = transactions.filter(t => {
+      // Para transações de crédito, usa dueDate; para outras, usa date
+      if (t.paymentMethod === 'CREDIT' && t.type === 'EXPENSE' && t.dueDate) {
+        return t.dueDate.startsWith(selectedMonth);
+      }
+      return t.date.startsWith(selectedMonth);
+    });
+
+    // Separa transações de crédito e outras transações
+    const creditTransactions = filtered.filter(
+      t => t.paymentMethod === 'CREDIT' && t.type === 'EXPENSE' && t.creditCardId && t.dueDate
+    );
+    const otherTransactions = filtered.filter(
+      t => !(t.paymentMethod === 'CREDIT' && t.type === 'EXPENSE' && t.creditCardId && t.dueDate)
+    );
+
+    // Agrupa transações de crédito por cartão e data de vencimento
+    const invoiceMap = new Map<string, InvoiceGroup>();
+    
+    creditTransactions.forEach(transaction => {
+      const key = `${transaction.creditCardId}-${transaction.dueDate}`;
+      
+      if (!invoiceMap.has(key)) {
+        const card = cards.find(c => c.id === transaction.creditCardId);
+        invoiceMap.set(key, {
+          id: key,
+          type: 'invoice',
+          cardName: card?.name || 'Cartão removido',
+          dueDate: transaction.dueDate!,
+          amount: 0
+        });
+      }
+      
+      const invoice = invoiceMap.get(key)!;
+      invoice.amount += transaction.amount;
+    });
+
+    // Combina faturas e outras transações
+    const items: DisplayItem[] = [
+      ...Array.from(invoiceMap.values()),
+      ...otherTransactions
+    ];
+
+    // Ordena por data (dueDate para faturas, date para outras)
+    items.sort((a, b) => {
+      const dateA = 'dueDate' in a ? a.dueDate : a.date;
+      const dateB = 'dueDate' in b ? b.dueDate : b.date;
+      if (!dateA || !dateB) return 0;
+      return dateB.localeCompare(dateA); // Mais recente primeiro
+    });
+
+    return items;
+  }, [transactions, selectedMonth, cards]);
+
+  const totalIn = useMemo(() => {
+    return displayItems
+      .filter(item => !('type' in item && item.type === 'invoice') && (item as Transaction).type === TransactionType.INCOME)
+      .reduce((acc, item) => acc + (item as Transaction).amount, 0);
+  }, [displayItems]);
+
+  const totalOut = useMemo(() => {
+    return displayItems.reduce((acc, item) => {
+      if ('type' in item && item.type === 'invoice') {
+        return acc + item.amount;
+      }
+      if ((item as Transaction).type === TransactionType.EXPENSE) {
+        return acc + (item as Transaction).amount;
+      }
+      return acc;
+    }, 0);
+  }, [displayItems]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -33,21 +118,11 @@ const Reports: React.FC<ReportsProps> = ({ transactions }) => {
        <div className="glass-card p-6 rounded-2xl">
           <div className="flex gap-4 mb-6">
              <div>
-               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Início</label>
+               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Mês de Referência</label>
                <input 
-                 type="date" 
-                 value={startDate}
-                 onChange={(e) => setStartDate(e.target.value)}
-                 className="px-4 py-2 rounded-lg bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-violet-500 text-gray-800"
-               />
-             </div>
-             <div>
-               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Fim</label>
-               <input 
-                 type="date" 
-                 max={new Date().toISOString().split('T')[0]}
-                 value={endDate}
-                 onChange={(e) => setEndDate(e.target.value)}
+                 type="month" 
+                 value={selectedMonth}
+                 onChange={(e) => setSelectedMonth(e.target.value)}
                  className="px-4 py-2 rounded-lg bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-violet-500 text-gray-800"
                />
              </div>
@@ -61,7 +136,9 @@ const Reports: React.FC<ReportsProps> = ({ transactions }) => {
                      <FileText size={20} className="text-violet-600" />
                      Extrato de Movimentação
                    </h3>
-                   <span className="text-sm text-gray-500">Período: {new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}</span>
+                   <span className="text-sm text-gray-500">
+                     Período: {new Date(selectedMonth + '-01').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                    <div className="p-3 bg-green-50 rounded-lg border border-green-100">
@@ -89,16 +166,43 @@ const Reports: React.FC<ReportsProps> = ({ transactions }) => {
                  </tr>
                </thead>
                <tbody className="divide-y divide-gray-100">
-                 {filtered.map(t => (
-                   <tr key={t.id} className="hover:bg-gray-50">
-                     <td className="px-6 py-3 text-gray-600">{new Date(t.date).toLocaleDateString()}</td>
-                     <td className="px-6 py-3 font-medium text-gray-800">{t.description}</td>
-                     <td className={`px-6 py-3 text-right font-bold ${t.type === TransactionType.INCOME ? 'text-green-600' : 'text-red-600'}`}>
-                       {t.type === TransactionType.INCOME ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                     </td>
-                   </tr>
-                 ))}
-                 {filtered.length === 0 && (
+                 {displayItems.map(item => {
+                   // Renderizar fatura agrupada
+                   if ('type' in item && item.type === 'invoice') {
+                     const invoice = item as InvoiceGroup;
+                     return (
+                       <tr key={invoice.id} className="hover:bg-gray-50 bg-violet-50">
+                         <td className="px-6 py-3 text-gray-600">
+                           {new Date(invoice.dueDate).toLocaleDateString()}
+                         </td>
+                         <td className="px-6 py-3 font-medium text-gray-800 flex items-center gap-2">
+                           <CreditCardIcon size={16} className="text-violet-600" />
+                           FATURA DO CARTÃO {invoice.cardName.toUpperCase()}
+                         </td>
+                         <td className="px-6 py-3 text-right font-bold text-red-600">
+                           - R$ {invoice.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                         </td>
+                       </tr>
+                     );
+                   }
+                   
+                   // Renderizar transação normal
+                   const transaction = item as Transaction;
+                   return (
+                     <tr key={transaction.id} className="hover:bg-gray-50">
+                       <td className="px-6 py-3 text-gray-600">
+                         {new Date(transaction.date).toLocaleDateString()}
+                       </td>
+                       <td className="px-6 py-3 font-medium text-gray-800">
+                         {transaction.description}
+                       </td>
+                       <td className={`px-6 py-3 text-right font-bold ${transaction.type === TransactionType.INCOME ? 'text-green-600' : 'text-red-600'}`}>
+                         {transaction.type === TransactionType.INCOME ? '+' : '-'} R$ {transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                       </td>
+                     </tr>
+                   );
+                 })}
+                 {displayItems.length === 0 && (
                    <tr>
                      <td colSpan={3} className="px-6 py-8 text-center text-gray-400">Nenhum registro encontrado.</td>
                    </tr>

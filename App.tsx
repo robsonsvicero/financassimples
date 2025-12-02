@@ -321,7 +321,7 @@ const App: React.FC = () => {
           />
         );
       case 'reports':
-        return <Reports transactions={transactions} />;
+        return <Reports transactions={transactions} cards={cards} />;
       case 'settings':
         return <Settings user={currentUser} onUpdateUser={handleUpdateUser} />;
       default:

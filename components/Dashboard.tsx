@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Transaction, TransactionType, CreditCard } from '../types';
 import { MONTH_NAMES } from '../constants';
 import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Calendar, Search, Filter, CreditCard as CreditCardIcon } from 'lucide-react';
@@ -10,13 +10,26 @@ interface DashboardProps {
   onDelete: (id: string) => void;
 }
 
+interface InvoiceGroup {
+  id: string;
+  type: 'invoice';
+  cardId: string;
+  cardName: string;
+  cardColor: string;
+  dueDate: string;
+  amount: number;
+  count: number;
+  isPaid: boolean;
+}
+
+type DisplayItem = Transaction | InvoiceGroup;
+
 const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const viewMode = 'month'; // Fixed to month view for now
+  const viewMode = 'month';
   const [tip, setTip] = useState<string>('');
 
   useEffect(() => {
-    // Load tip once on mount
     getFinancialTip().then(setTip);
   }, []);
 
@@ -24,79 +37,100 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
     const newDate = new Date(currentDate);
     if (viewMode === 'month') {
       newDate.setMonth(newDate.getMonth() + increment);
-    } else if (viewMode === 'year') {
-      newDate.setFullYear(newDate.getFullYear() + increment);
-    } else {
-      newDate.setDate(newDate.getDate() + increment);
     }
     setCurrentDate(newDate);
   };
 
-  const getFilteredTransactions = () => {
-    // Basic filter for Month view logic - strictly relying on Date objects for comparison
-    return transactions.filter(t => {
-      const tDate = new Date(t.date);
-      // For credit card expenses, we usually want to see them based on their billing cycle/invoice month?
-      // Requirement says: "Spreadsheet view displaying all transactions".
-      // Requirement 5 says: Aggregated invoices.
-      
-      // Filter by Month View Logic
-      if (viewMode === 'month') {
-        return tDate.getMonth() === currentDate.getMonth() && tDate.getFullYear() === currentDate.getFullYear();
+  // Obtém o mês atual no formato YYYY-MM
+  const currentMonth = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  }, [currentDate]);
+
+  const displayList = useMemo(() => {
+    // Filtra transações pelo mês selecionado
+    const filtered = transactions.filter(t => {
+      // Para transações de crédito, usa dueDate; para outras, usa date
+      if (t.paymentMethod === 'CREDIT' && t.type === 'EXPENSE' && t.dueDate) {
+        return t.dueDate.startsWith(currentMonth);
       }
-      return true; // Simplify for demo, expand for other views
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  };
-
-  const filteredRaw = getFilteredTransactions();
-
-  // Aggregation Logic for Credit Cards
-  const processedTransactions: any[] = [];
-  const creditCardBills: Record<string, { cardId: string, amount: number, dueDate: string, count: number }> = {};
-
-  filteredRaw.forEach(t => {
-    if (t.paymentMethod === 'CREDIT' && t.creditCardId) {
-      // It's a credit card transaction.
-      // Based on Requirement 5: "Expenses with Credit Card... aggregated into a single entry"
-      // However, usually aggregation happens based on Invoice Due Date.
-      // If we are looking at specific month transactions, we list them.
-      // But if we want the "Invoice" view, we group by due date.
-      
-      // Let's implement the aggregation for the Dashboard List
-      const key = `${t.creditCardId}-${t.dueDate}`;
-      if (!creditCardBills[key]) {
-        creditCardBills[key] = { cardId: t.creditCardId, amount: 0, dueDate: t.dueDate || '', count: 0 };
-      }
-      creditCardBills[key].amount += t.amount;
-      creditCardBills[key].count += 1;
-    } else {
-      processedTransactions.push(t);
-    }
-  });
-
-  // Convert aggregated bills back to list items
-  Object.values(creditCardBills).forEach(bill => {
-    const card = cards.find(c => c.id === bill.cardId);
-    processedTransactions.push({
-      id: `bill-${bill.cardId}-${bill.dueDate}`,
-      description: `Fatura Cartão ${card?.name}`,
-      amount: bill.amount,
-      date: bill.dueDate, // Display based on due date
-      type: TransactionType.EXPENSE,
-      paymentMethod: 'CREDIT',
-      category: '1', // Taxas e Impostos or generic
-      isAggregated: true,
-      cardColor: card?.color,
-      itemCount: bill.count
+      return t.date.startsWith(currentMonth);
     });
-  });
 
-  // Sort final list by date
-  const displayList = processedTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Separa transações de crédito e outras transações
+    const creditTransactions = filtered.filter(
+      t => t.paymentMethod === 'CREDIT' && t.type === 'EXPENSE' && t.creditCardId && t.dueDate
+    );
+    const otherTransactions = filtered.filter(
+      t => !(t.paymentMethod === 'CREDIT' && t.type === 'EXPENSE' && t.creditCardId && t.dueDate)
+    );
+
+    // Agrupa transações de crédito por cartão e data de vencimento
+    const invoiceMap = new Map<string, InvoiceGroup>();
+    
+    creditTransactions.forEach(transaction => {
+      const key = `${transaction.creditCardId}-${transaction.dueDate}`;
+      
+      if (!invoiceMap.has(key)) {
+        const card = cards.find(c => c.id === transaction.creditCardId);
+        invoiceMap.set(key, {
+          id: key,
+          type: 'invoice',
+          cardId: transaction.creditCardId!,
+          cardName: card?.name || 'Cartão removido',
+          cardColor: card?.color || 'bg-gray-500',
+          dueDate: transaction.dueDate!,
+          amount: 0,
+          count: 0,
+          isPaid: true
+        });
+      }
+      
+      const invoice = invoiceMap.get(key)!;
+      invoice.amount += transaction.amount;
+      invoice.count += 1;
+      if (!transaction.isPaid) {
+        invoice.isPaid = false;
+      }
+    });
+
+    // Combina faturas e outras transações
+    const items: DisplayItem[] = [
+      ...Array.from(invoiceMap.values()),
+      ...otherTransactions
+    ];
+
+    // Ordena por data (dueDate para faturas, date para outras)
+    items.sort((a, b) => {
+      const dateA = 'dueDate' in a ? a.dueDate : a.date;
+      const dateB = 'dueDate' in b ? b.dueDate : b.date;
+      if (!dateA || !dateB) return 0;
+      return dateB.localeCompare(dateA);
+    });
+
+    return items;
+  }, [transactions, currentMonth, cards]);
 
   // Totals
-  const totalIncome = displayList.filter(t => t.type === TransactionType.INCOME).reduce((acc, t) => acc + t.amount, 0);
-  const totalExpense = displayList.filter(t => t.type === TransactionType.EXPENSE).reduce((acc, t) => acc + t.amount, 0);
+  const totalIncome = useMemo(() => {
+    return displayList
+      .filter(item => !('type' in item && item.type === 'invoice') && (item as Transaction).type === TransactionType.INCOME)
+      .reduce((acc, item) => acc + (item as Transaction).amount, 0);
+  }, [displayList]);
+
+  const totalExpense = useMemo(() => {
+    return displayList.reduce((acc, item) => {
+      if ('type' in item && item.type === 'invoice') {
+        return acc + item.amount;
+      }
+      if ((item as Transaction).type === TransactionType.EXPENSE) {
+        return acc + (item as Transaction).amount;
+      }
+      return acc;
+    }, 0);
+  }, [displayList]);
+
   const balance = totalIncome - totalExpense;
 
   return (
@@ -206,58 +240,94 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
                   </td>
                 </tr>
               ) : (
-                displayList.map((t) => {
-                  const isExpense = t.type === TransactionType.EXPENSE;
-                  // const Icon = ICON_MAP[t.category] || ICON_MAP['MoreHorizontal']; // Future: display icons
+                displayList.map((item) => {
+                  // Renderizar fatura agrupada
+                  if ('type' in item && item.type === 'invoice') {
+                    const invoice = item as InvoiceGroup;
+                    return (
+                      <tr key={invoice.id} className="hover:bg-white/40 transition-colors group bg-violet-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="font-medium text-gray-700">
+                              {new Date(invoice.dueDate).getDate()}
+                            </span>
+                            <span className="text-xs text-gray-400 uppercase">
+                               {new Date(invoice.dueDate).toLocaleDateString('pt-BR', { weekday: 'short' })}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                           <div className="flex items-center gap-3">
+                             <div className={`w-8 h-8 rounded-full ${invoice.cardColor} flex items-center justify-center text-white`}>
+                               <CreditCardIcon size={14} />
+                             </div>
+                             <div>
+                               <p className="font-medium text-gray-800">FATURA DO CARTÃO {invoice.cardName.toUpperCase()}</p>
+                               <p className="text-xs text-gray-400">{invoice.count} transações</p>
+                             </div>
+                           </div>
+                        </td>
+                        <td className="px-6 py-4">
+                           <span className="px-2 py-1 rounded-md bg-violet-100 text-xs font-medium text-violet-700">Fatura Cartão</span>
+                        </td>
+                        <td className="px-6 py-4 text-right font-semibold text-red-600">
+                          - R$ {invoice.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                           {invoice.isPaid ? (
+                             <span className="text-green-500 bg-green-50 px-2 py-1 rounded-full text-xs">Paga</span>
+                           ) : (
+                             <span className="text-orange-500 bg-orange-50 px-2 py-1 rounded-full text-xs">Pendente</span>
+                           )}
+                        </td>
+                      </tr>
+                    );
+                  }
+
+                  // Renderizar transação normal
+                  const transaction = item as Transaction;
+                  const isExpense = transaction.type === TransactionType.EXPENSE;
                   
                   return (
-                    <tr key={t.id} className="hover:bg-white/40 transition-colors group">
+                    <tr key={transaction.id} className="hover:bg-white/40 transition-colors group">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col">
                           <span className="font-medium text-gray-700">
-                            {new Date(t.date).getDate()}
+                            {new Date(transaction.date).getDate()}
                           </span>
                           <span className="text-xs text-gray-400 uppercase">
-                             {new Date(t.date).toLocaleDateString('pt-BR', { weekday: 'short' })}
+                             {new Date(transaction.date).toLocaleDateString('pt-BR', { weekday: 'short' })}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                          <div className="flex items-center gap-3">
-                           {t.isAggregated ? (
-                             <div className={`w-8 h-8 rounded-full ${t.cardColor || 'bg-gray-500'} flex items-center justify-center text-white`}>
-                               <CreditCardIcon size={14} />
-                             </div>
-                           ) : (
-                             <div className={`w-8 h-8 rounded-full ${isExpense ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-500'} flex items-center justify-center`}>
-                                {isExpense ? <TrendingDown size={16} /> : <TrendingUp size={16} />}
-                             </div>
-                           )}
+                           <div className={`w-8 h-8 rounded-full ${isExpense ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-500'} flex items-center justify-center`}>
+                              {isExpense ? <TrendingDown size={16} /> : <TrendingUp size={16} />}
+                           </div>
                            <div>
-                             <p className="font-medium text-gray-800">{t.description}</p>
-                             {t.installmentTotal && (
+                             <p className="font-medium text-gray-800">{transaction.description}</p>
+                             {transaction.installmentTotal && transaction.installmentTotal > 1 && (
                                <p className="text-xs text-gray-400">
-                                 Parcela {t.installmentCurrent}/{t.installmentTotal}
+                                 Parcela {transaction.installmentCurrent}/{transaction.installmentTotal}
                                </p>
-                             )}
-                             {t.isAggregated && (
-                                <p className="text-xs text-gray-400">{t.itemCount} transações</p>
                              )}
                            </div>
                          </div>
                       </td>
                       <td className="px-6 py-4">
-                         {t.isAggregated ? (
-                           <span className="px-2 py-1 rounded-md bg-gray-100 text-xs font-medium text-gray-600">Fatura Cartão</span>
-                         ) : (
-                           <span className="px-2 py-1 rounded-md bg-gray-100 text-xs font-medium text-gray-600">Geral</span>
-                         )}
+                         <span className="px-2 py-1 rounded-md bg-gray-100 text-xs font-medium text-gray-600">
+                           {transaction.paymentMethod === 'CASH' && 'Dinheiro'}
+                           {transaction.paymentMethod === 'DEBIT' && 'Débito'}
+                           {transaction.paymentMethod === 'PIX' && 'PIX'}
+                           {transaction.paymentMethod === 'CREDIT' && 'Crédito'}
+                         </span>
                       </td>
                       <td className={`px-6 py-4 text-right font-semibold ${isExpense ? 'text-red-600' : 'text-green-600'}`}>
-                        {isExpense ? '-' : '+'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        {isExpense ? '-' : '+'} R$ {transaction.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-6 py-4 text-center">
-                         {t.isPaid || t.type === TransactionType.INCOME ? (
+                         {transaction.isPaid || transaction.type === TransactionType.INCOME ? (
                            <span className="text-green-500 bg-green-50 px-2 py-1 rounded-full text-xs">Pago</span>
                          ) : (
                            <span className="text-orange-500 bg-orange-50 px-2 py-1 rounded-full text-xs">Pendente</span>
