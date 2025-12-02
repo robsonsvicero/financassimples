@@ -43,15 +43,21 @@ const App: React.FC = () => {
       // Listen for auth changes (incluindo sessão inicial)
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('[onAuthStateChange] Evento:', event, 'Email:', session?.user?.email);
-        if (!isMounted || !supabase) return;
+        if (!isMounted || !supabase) {
+          console.log('[onAuthStateChange] Abortando - isMounted:', isMounted, 'supabase:', !!supabase);
+          return;
+        }
         
         if (session?.user) {
+          console.log('[onAuthStateChange] Buscando profile para:', session.user.id);
           // Busca profile separadamente
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
+          
+          console.log('[onAuthStateChange] Profile:', profile, 'Erro:', profileError);
           
           const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
           
@@ -63,9 +69,12 @@ const App: React.FC = () => {
             isAdmin
           };
           
+          console.log('[onAuthStateChange] User construído:', user);
           setCurrentUser(user);
+          console.log('[onAuthStateChange] Carregando dados...');
           loadData(user.id).catch(console.error);
         } else {
+          console.log('[onAuthStateChange] Sem sessão - limpando dados');
           setCurrentUser(null);
           setTransactions([]);
           setCards([]);
