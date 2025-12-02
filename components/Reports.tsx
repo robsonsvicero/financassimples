@@ -150,7 +150,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
                      Período: {new Date(selectedMonth + '-01').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                    </span>
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 gap-3 text-sm">
                    <div className="p-3 bg-green-50 rounded-lg border border-green-100">
                       <span className="block text-green-600 font-medium">Entradas</span>
                       <span className="text-lg font-bold text-green-700">R$ {totalIn.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
