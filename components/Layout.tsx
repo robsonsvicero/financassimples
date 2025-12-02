@@ -33,7 +33,9 @@ const Layout: React.FC<LayoutProps> = ({
   
   const navItems = React.useMemo(() => [
     { id: 'dashboard', label: 'Painel', icon: LayoutDashboard },
+    { id: 'transactions', label: 'Transações', icon: FileText },
     { id: 'cards', label: 'Cartões', icon: CreditCard },
+    { id: 'categories', label: 'Categorias', icon: PieChart },
     { id: 'budget', label: 'Orçamento', icon: PieChart },
     { id: 'reports', label: 'Relatórios', icon: FileText },
     { id: 'settings', label: 'Config.', icon: Settings },
@@ -150,7 +152,7 @@ const Layout: React.FC<LayoutProps> = ({
       {isMobile && (
       <div className={`fixed inset-0 z-50 transition-opacity ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}></div>
-        <aside className={`flex flex-col w-64 bg-white h-full z-50 shadow-xl transition-transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <aside className={`absolute left-0 top-0 flex flex-col w-64 bg-white h-full shadow-xl transition-transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-6 border-b">
             <div className="flex items-center gap-2 mb-1">
                <img src={APP_LOGO} alt="Logo" className="w-8 h-8 object-contain" />

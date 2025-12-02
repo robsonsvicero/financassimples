@@ -9,6 +9,8 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Auth from './components/Auth';
 import LoadingScreen from './components/LoadingScreen';
+import TransactionsManager from './components/TransactionsManager';
+import CategoriesManager from './components/CategoriesManager';
 import * as ApiService from './services/api';
 import { supabase } from './services/supabaseClient';
 
@@ -17,6 +19,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isTransactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [authError, setAuthError] = useState('');
   
   // App Data State
@@ -278,6 +281,37 @@ const App: React.FC = () => {
         );
       case 'budget':
         return <BudgetAnalysis transactions={transactions} categories={categories} budgets={budgets} onUpdateBudget={handleUpdateBudget} />;
+      case 'transactions':
+        return (
+          <TransactionsManager
+            transactions={transactions}
+            categories={categories}
+            cards={cards}
+            onEdit={(t) => {
+              setEditingTransaction(t);
+              setTransactionModalOpen(true);
+            }}
+            onDelete={handleDeleteTransaction}
+          />
+        );
+      case 'categories':
+        return (
+          <CategoriesManager
+            categories={categories}
+            onAdd={async (cat) => {
+              const newCat = await ApiService.addCategory({ ...cat, id: Date.now().toString() });
+              setCategories([...categories, newCat]);
+            }}
+            onEdit={async (cat) => {
+              await ApiService.updateCategory(cat);
+              setCategories(categories.map(c => c.id === cat.id ? cat : c));
+            }}
+            onDelete={async (id) => {
+              await ApiService.deleteCategory(id);
+              setCategories(categories.filter(c => c.id !== id));
+            }}
+          />
+        );
       case 'reports':
         return <Reports transactions={transactions} />;
       case 'settings':

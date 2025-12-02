@@ -12,6 +12,9 @@ interface BudgetAnalysisProps {
 
 const BudgetAnalysis: React.FC<BudgetAnalysisProps> = ({ transactions, categories, budgets, onUpdateBudget }) => {
   const [showCharts, setShowCharts] = useState(false);
+  const [showNewBudgetModal, setShowNewBudgetModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [budgetAmount, setBudgetAmount] = useState('');
 
   // Calculate spending per category for current month
   const currentMonth = new Date().getMonth();
@@ -125,12 +128,92 @@ const BudgetAnalysis: React.FC<BudgetAnalysisProps> = ({ transactions, categorie
            );
         })}
         
-        {/* Add Category Card Placeholder */}
-        <button className="border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-gray-400 hover:border-violet-400 hover:text-violet-500 transition-colors bg-white/30">
+        {/* Add Budget Card */}
+        <button 
+          onClick={() => setShowNewBudgetModal(true)}
+          className="border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-gray-400 hover:border-violet-400 hover:text-violet-500 transition-colors bg-white/30"
+        >
            <span className="text-2xl mb-2">+</span>
-           <span className="text-sm font-medium">Nova Categoria</span>
+           <span className="text-sm font-medium">Novo Orçamento</span>
         </button>
       </div>
+
+      {/* Modal Novo Orçamento */}
+      {showNewBudgetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="glass-card p-6 rounded-2xl max-w-md w-full animate-scale-up">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Novo Orçamento</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Categoria
+                </label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500 outline-none"
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {categories
+                    .filter(c => c.type === 'EXPENSE' || c.type === 'BOTH')
+                    .filter(c => !budgets.find(b => b.categoryId === c.id))
+                    .map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Valor do Orçamento
+                </label>
+                <input
+                  type="number"
+                  value={budgetAmount}
+                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500 outline-none"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    if (selectedCategory && budgetAmount) {
+                      onUpdateBudget({
+                        categoryId: selectedCategory,
+                        amount: parseFloat(budgetAmount),
+                        month: new Date().toISOString().slice(0, 7)
+                      });
+                      setSelectedCategory('');
+                      setBudgetAmount('');
+                      setShowNewBudgetModal(false);
+                    }
+                  }}
+                  className="flex-1 px-6 py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors font-semibold"
+                >
+                  Criar Orçamento
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNewBudgetModal(false);
+                    setSelectedCategory('');
+                    setBudgetAmount('');
+                  }}
+                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-semibold"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
