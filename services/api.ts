@@ -263,17 +263,34 @@ export const listAllUsers = async (): Promise<User[]> => {
 export const deleteUser = async (userId: string) => {
   const client = checkSupabase();
   
+  console.log('[deleteUser] Iniciando deleção do usuário:', userId);
+  
   // Deleta dados do usuário (ignora erros - podem não existir registros)
-  await client.from('transactions').delete().eq('user_id', userId);
-  await client.from('cards').delete().eq('user_id', userId);
-  await client.from('categories').delete().eq('user_id', userId);
-  await client.from('budgets').delete().eq('user_id', userId);
+  console.log('[deleteUser] Deletando transactions...');
+  const { error: txError } = await client.from('transactions').delete().eq('user_id', userId);
+  console.log('[deleteUser] Transactions:', txError ? `Erro: ${txError.message}` : 'OK');
+  
+  console.log('[deleteUser] Deletando cards...');
+  const { error: cardError } = await client.from('cards').delete().eq('user_id', userId);
+  console.log('[deleteUser] Cards:', cardError ? `Erro: ${cardError.message}` : 'OK');
+  
+  console.log('[deleteUser] Deletando categories...');
+  const { error: catError } = await client.from('categories').delete().eq('user_id', userId);
+  console.log('[deleteUser] Categories:', catError ? `Erro: ${catError.message}` : 'OK');
+  
+  console.log('[deleteUser] Deletando budgets...');
+  const { error: budgetError } = await client.from('budgets').delete().eq('user_id', userId);
+  console.log('[deleteUser] Budgets:', budgetError ? `Erro: ${budgetError.message}` : 'OK');
   
   // Deleta perfil do usuário (o trigger vai deletar da auth automaticamente)
+  console.log('[deleteUser] Deletando profile...');
   const { error: profileError } = await client.from('profiles').delete().eq('id', userId);
+  console.log('[deleteUser] Profile:', profileError ? `Erro: ${profileError.message}` : 'OK');
   
   if (profileError) {
-    console.error('Erro ao deletar profile:', profileError);
+    console.error('[deleteUser] Erro ao deletar profile:', profileError);
     throw new Error(`Erro ao deletar usuário: ${profileError.message}`);
   }
+  
+  console.log('[deleteUser] Deleção concluída com sucesso!');
 };
