@@ -19,7 +19,6 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isTransactionModalOpen, setTransactionModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [authError, setAuthError] = useState('');
   
   // App Data State
@@ -287,9 +286,9 @@ const App: React.FC = () => {
             transactions={transactions}
             categories={categories}
             cards={cards}
-            onEdit={(t) => {
-              setEditingTransaction(t);
-              setTransactionModalOpen(true);
+            onEdit={() => {
+              // TODO: Implementar edição de transação
+              alert('Funcionalidade de edição em desenvolvimento');
             }}
             onDelete={handleDeleteTransaction}
           />
@@ -298,16 +297,14 @@ const App: React.FC = () => {
         return (
           <CategoriesManager
             categories={categories}
-            onAdd={async (cat) => {
-              const newCat = await ApiService.addCategory({ ...cat, id: Date.now().toString() });
+            onAdd={(cat) => {
+              const newCat = { ...cat, id: Date.now().toString() };
               setCategories([...categories, newCat]);
             }}
-            onEdit={async (cat) => {
-              await ApiService.updateCategory(cat);
+            onEdit={(cat) => {
               setCategories(categories.map(c => c.id === cat.id ? cat : c));
             }}
-            onDelete={async (id) => {
-              await ApiService.deleteCategory(id);
+            onDelete={(id) => {
               setCategories(categories.filter(c => c.id !== id));
             }}
           />

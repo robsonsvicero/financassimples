@@ -23,7 +23,7 @@ const LoadingScreen: React.FC = () => {
             />
           </div>
           <div className="mt-6 text-center">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-blue-600">
+            <h1 className="text-3xl font-bold bg-clip-text text-green-600">
               Finanças<span className="font-light text-gray-600">$imples</span>
             </h1>
             <p className="text-sm text-gray-500 mt-2 animate-pulse">Carregando...</p>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction, Category, CreditCard } from '../types';
-import { Pencil, Trash2, Search, Filter, DollarSign, Calendar } from 'lucide-react';
+import { Pencil, Trash2, Search, Filter, Calendar } from 'lucide-react';
 import { ICON_MAP } from '../constants';
 
 interface TransactionsManagerProps {
@@ -31,12 +31,12 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
     });
   }, [transactions, searchTerm, filterType, filterMonth]);
 
-  const getCategoryName = (catId: string) => {
-    return categories.find(c => c.id === catId)?.name || 'Sem categoria';
+  const getCategoryName = (category: string) => {
+    return categories.find(c => c.id === category)?.name || 'Sem categoria';
   };
 
-  const getCategoryIcon = (catId: string) => {
-    const cat = categories.find(c => c.id === catId);
+  const getCategoryIcon = (category: string) => {
+    const cat = categories.find(c => c.id === category);
     if (!cat?.icon) return null;
     const IconComponent = ICON_MAP[cat.icon];
     return IconComponent ? <IconComponent size={16} className={cat.color} /> : null;
@@ -129,17 +129,17 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                 {/* Info Principal */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                    {getCategoryIcon(transaction.categoryId)}
+                    {getCategoryIcon(transaction.category)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 truncate">
                       {transaction.description}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                      <span>{getCategoryName(transaction.categoryId)}</span>
+                      <span>{getCategoryName(transaction.category)}</span>
                       <span>•</span>
                       <span>{formatDate(transaction.date)}</span>
-                      {transaction.paymentMethod === 'CREDIT_CARD' && transaction.creditCardId && (
+                      {transaction.paymentMethod === 'CREDIT' && transaction.creditCardId && (
                         <>
                           <span>•</span>
                           <span>{getCardName(transaction.creditCardId)}</span>
