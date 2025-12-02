@@ -142,14 +142,14 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
            <p className="text-gray-500 text-sm">Visão geral das suas movimentações</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
-           <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+        <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+           <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
              <ChevronLeft size={20} />
            </button>
-           <div className="px-4 py-1 text-center min-w-[140px] font-medium text-gray-700">
+           <div className="px-2 sm:px-4 py-1 text-center min-w-[120px] sm:min-w-[140px] font-medium text-gray-700 text-sm sm:text-base">
              {viewMode === 'month' && `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
            </div>
-           <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+           <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
              <ChevronRight size={20} />
            </button>
         </div>
@@ -222,14 +222,14 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-600">
+          <table className="w-full text-left text-sm text-gray-600 min-w-[600px]">
             <thead className="bg-gray-50/50 text-gray-500 font-medium uppercase text-xs tracking-wider">
               <tr>
-                <th className="px-6 py-4">Data</th>
-                <th className="px-6 py-4">Descrição</th>
-                <th className="px-6 py-4">Categoria</th>
-                <th className="px-6 py-4 text-right">Valor</th>
-                <th className="px-6 py-4 text-center">Status</th>
+                <th className="px-3 sm:px-6 py-4">Data</th>
+                <th className="px-3 sm:px-6 py-4">Descrição</th>
+                <th className="px-3 sm:px-6 py-4">Categoria</th>
+                <th className="px-3 sm:px-6 py-4 text-right">Valor</th>
+                <th className="px-3 sm:px-6 py-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

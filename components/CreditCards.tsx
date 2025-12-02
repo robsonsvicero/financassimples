@@ -103,9 +103,9 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
        </div>
 
        {showForm && (
-         <div className="glass-card p-6 rounded-2xl animate-slide-down">
+         <div className="glass-card p-4 sm:p-6 rounded-2xl animate-slide-down">
             <h3 className="font-semibold text-gray-700 mb-4">{isEditing ? 'Editar Cartão' : 'Adicionar Cartão'}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                <input 
                  placeholder="Nome do Cartão" 
                  className="p-3 bg-white/60 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-slate-400 text-gray-800"
@@ -153,12 +153,12 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
            <p className="text-gray-500">Nenhum cartão cadastrado.</p>
          </div>
        ) : (
-         <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
+         <div className="flex gap-4 overflow-x-auto pb-4 snap-x -mx-4 px-4">
            {cards.map(card => (
              <div 
                key={card.id}
                onClick={() => setSelectedCardId(card.id)}
-               className={`flex-shrink-0 w-80 h-48 rounded-2xl p-6 relative overflow-hidden transition-all cursor-pointer snap-center shadow-lg ${selectedCardId === card.id ? 'ring-4 ring-offset-2 ring-violet-200 scale-[1.02]' : 'hover:scale-[1.01]'} ${card.color} text-white`}
+               className={`flex-shrink-0 w-[calc(100vw-2rem)] sm:w-80 h-48 rounded-2xl p-6 relative overflow-hidden transition-all cursor-pointer snap-center shadow-lg ${selectedCardId === card.id ? 'ring-4 ring-offset-2 ring-violet-200 scale-[1.02]' : 'hover:scale-[1.01]'} ${card.color} text-white`}
              >
                 {/* Glass Effect Overlay */}
                 <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>
@@ -185,12 +185,12 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
        {/* Details Area */}
        {selectedCard && (
          <div className="glass-card rounded-2xl overflow-hidden mt-6">
-            <div className="p-6 border-b border-gray-100 bg-white/40">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="p-4 sm:p-6 border-b border-gray-100 bg-white/40">
+              <div className="flex flex-col gap-4">
                 <div className="flex-1">
-                   <div className="flex items-center gap-3">
-                     <h3 className="font-bold text-lg text-gray-800">Fatura - {selectedCard.name}</h3>
-                     <div className="flex gap-1">
+                   <div className="flex items-center justify-between gap-2">
+                     <h3 className="font-bold text-base sm:text-lg text-gray-800 truncate">Fatura - {selectedCard.name}</h3>
+                     <div className="flex gap-1 flex-shrink-0">
                         <button 
                           onClick={() => handleOpenEditForm(selectedCard)}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
@@ -207,27 +207,27 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
                         </button>
                      </div>
                    </div>
-                   <p className="text-sm text-gray-500">Selecione o mês para ver a fatura</p>
+                   <p className="text-xs sm:text-sm text-gray-500 mt-1">Selecione o mês para ver a fatura</p>
                 </div>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   {/* Navegação por Mês */}
-                  <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
-                    <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                  <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+                    <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
                       <ChevronLeft size={20} />
                     </button>
-                    <div className="px-4 py-1 text-center min-w-[140px] font-medium text-gray-700">
+                    <div className="px-2 sm:px-4 py-1 text-center min-w-[120px] sm:min-w-[140px] font-medium text-gray-700 text-sm sm:text-base">
                       {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
                     </div>
-                    <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                    <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
                       <ChevronRight size={20} />
                     </button>
                   </div>
                   
                   {/* Total da Fatura */}
-                  <div className="text-right pl-4 border-l border-gray-200">
+                  <div className="text-center sm:text-right sm:pl-4 sm:border-l border-gray-200 py-2 sm:py-0">
                     <p className="text-xs text-gray-500 uppercase">Total da Fatura</p>
-                    <p className="text-2xl font-bold text-slate-800">R$ {totalInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-slate-800">R$ {totalInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   </div>
                 </div>
               </div>
@@ -267,17 +267,17 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
               )}
             </div>
             
-            <div className="p-0">
+            <div className="p-0 overflow-x-auto">
                {cardTransactions.length === 0 ? (
                  <div className="p-8 text-center text-gray-400">Nenhuma compra registrada neste cartão.</div>
                ) : (
-                 <table className="w-full text-left text-sm">
+                 <table className="w-full text-left text-sm min-w-[600px]">
                    <thead className="bg-gray-50 text-gray-500">
                      <tr>
-                       <th className="px-6 py-3">Data Compra</th>
-                       <th className="px-6 py-3">Descrição</th>
-                       <th className="px-6 py-3">Vencimento</th>
-                       <th className="px-6 py-3 text-right">Valor</th>
+                       <th className="px-3 sm:px-6 py-3">Data Compra</th>
+                       <th className="px-3 sm:px-6 py-3">Descrição</th>
+                       <th className="px-3 sm:px-6 py-3">Vencimento</th>
+                       <th className="px-3 sm:px-6 py-3 text-right">Valor</th>
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-gray-100">

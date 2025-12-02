@@ -238,8 +238,10 @@ const Layout: React.FC<LayoutProps> = ({
       )}
 
       {/* --- Main Content Area --- */}
-      <main className={`flex-1 p-4 ${isMobile ? 'pt-20' : 'pl-72 pt-8'}`}>
-        {children}
+      <main className={`flex-1 p-4 ${isMobile ? 'pt-20' : 'pl-72 pt-8'} overflow-x-hidden`}>
+        <div className="max-w-full">
+          {children}
+        </div>
       </main>
     </div>
   );

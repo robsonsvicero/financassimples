@@ -124,21 +124,21 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
           <div className="flex justify-between items-center mb-6">
              <div>
                <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Período</label>
-               <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
-                 <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+               <div className="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+                 <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
                    <ChevronLeft size={20} />
                  </button>
-                 <div className="px-4 py-1 text-center min-w-[140px] font-medium text-gray-700">
+                 <div className="px-2 sm:px-4 py-1 text-center min-w-[120px] sm:min-w-[140px] font-medium text-gray-700 text-sm sm:text-base">
                    {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
                  </div>
-                 <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                 <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
                    <ChevronRight size={20} />
                  </button>
                </div>
              </div>
           </div>
 
-          <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+          <div className="border border-gray-200 rounded-xl overflow-hidden bg-white overflow-x-auto">
              {/* Header like Bank Statement */}
              <div className="bg-gray-50 p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center mb-4">
@@ -167,12 +167,12 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
              </div>
 
              {/* Table */}
-             <table className="w-full text-left text-sm">
+             <table className="w-full text-left text-sm min-w-[500px]">
                <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
                  <tr>
-                   <th className="px-6 py-3 font-semibold">Data</th>
-                   <th className="px-6 py-3 font-semibold">Descrição</th>
-                   <th className="px-6 py-3 text-right font-semibold">Valor</th>
+                   <th className="px-3 sm:px-6 py-3 font-semibold">Data</th>
+                   <th className="px-3 sm:px-6 py-3 font-semibold">Descrição</th>
+                   <th className="px-3 sm:px-6 py-3 text-right font-semibold">Valor</th>
                  </tr>
                </thead>
                <tbody className="divide-y divide-gray-100">
