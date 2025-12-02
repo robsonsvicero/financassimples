@@ -179,8 +179,7 @@ const App: React.FC = () => {
 
   const handleUpdateUser = async (updatedUser: User) => {
     try {
-      if (!updatedUser.avatar) return; // Optional check
-      await ApiService.updateUserProfile(updatedUser.id, updatedUser.name, updatedUser.avatar);
+      await ApiService.updateUserProfile(updatedUser.id, updatedUser.name, updatedUser.avatar || '');
       setCurrentUser(updatedUser);
     } catch (e) {
       console.error("Failed to update profile", e);

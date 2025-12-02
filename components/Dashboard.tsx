@@ -28,10 +28,16 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const viewMode = 'month';
   const [tip, setTip] = useState<string>('');
+  const [tipLoaded, setTipLoaded] = useState(false);
 
   useEffect(() => {
-    getFinancialTip().then(setTip);
-  }, []);
+    if (!tipLoaded) {
+      getFinancialTip().then((receivedTip) => {
+        setTip(receivedTip);
+        setTipLoaded(true);
+      });
+    }
+  }, [tipLoaded]);
 
   const changeDate = (increment: number) => {
     const newDate = new Date(currentDate);

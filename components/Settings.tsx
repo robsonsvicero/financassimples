@@ -16,6 +16,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -24,6 +25,8 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
     e.preventDefault();
     if (user) {
       onUpdateUser({ ...user, name, avatar: avatarUrl });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     }
   };
 
@@ -58,6 +61,26 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
   };
 
   const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging) {
+      const touch = e.touches[0];
+      setPosition({
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
     setIsDragging(false);
   };
 
@@ -129,11 +152,14 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
              <div className="space-y-4">
                {/* Área de Preview */}
                <div 
-                 className="relative w-full h-80 bg-gray-100 rounded-xl overflow-hidden cursor-move"
+                 className="relative w-full h-80 bg-gray-100 rounded-xl overflow-hidden cursor-move touch-none"
                  onMouseDown={handleMouseDown}
                  onMouseMove={handleMouseMove}
                  onMouseUp={handleMouseUp}
                  onMouseLeave={handleMouseUp}
+                 onTouchStart={handleTouchStart}
+                 onTouchMove={handleTouchMove}
+                 onTouchEnd={handleTouchEnd}
                >
                  {/* Círculo de corte */}
                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -267,6 +293,12 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
                   <Save size={18} />
                   Salvar Alterações
                </button>
+               
+               {saved && (
+                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm text-center animate-fade-in">
+                   ✓ Alterações salvas com sucesso!
+                 </div>
+               )}
              </div>
           </form>
        </div>
