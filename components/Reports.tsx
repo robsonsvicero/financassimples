@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction, TransactionType, CreditCard } from '../types';
-import { Download, FileText, CreditCard as CreditCardIcon } from 'lucide-react';
+import { Download, FileText, CreditCard as CreditCardIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MONTH_NAMES } from '../constants';
 
 interface ReportsProps {
   transactions: Transaction[];
@@ -18,15 +19,19 @@ interface InvoiceGroup {
 type DisplayItem = Transaction | InvoiceGroup;
 
 const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
-  // Obtém o mês atual no formato YYYY-MM
-  const getCurrentMonth = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}`;
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const changeDate = (increment: number) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + increment);
+    setCurrentDate(newDate);
   };
 
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+  const selectedMonth = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  }, [currentDate]);
 
   const displayItems = useMemo(() => {
     // Filtra transações pelo mês selecionado
@@ -116,15 +121,20 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
        </div>
 
        <div className="glass-card p-6 rounded-2xl">
-          <div className="flex gap-4 mb-6">
+          <div className="flex justify-between items-center mb-6">
              <div>
-               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Mês de Referência</label>
-               <input 
-                 type="month" 
-                 value={selectedMonth}
-                 onChange={(e) => setSelectedMonth(e.target.value)}
-                 className="px-4 py-2 rounded-lg bg-gray-50 border border-gray-200 outline-none focus:ring-2 focus:ring-violet-500 text-gray-800"
-               />
+               <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Período</label>
+               <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+                 <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                   <ChevronLeft size={20} />
+                 </button>
+                 <div className="px-4 py-1 text-center min-w-[140px] font-medium text-gray-700">
+                   {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
+                 </div>
+                 <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                   <ChevronRight size={20} />
+                 </button>
+               </div>
              </div>
           </div>
 

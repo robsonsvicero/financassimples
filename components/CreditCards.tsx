@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CreditCard, Transaction } from '../types';
-import { Plus, CreditCard as CardIcon, Trash2, Pencil } from 'lucide-react';
+import { Plus, CreditCard as CardIcon, Trash2, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MONTH_NAMES } from '../constants';
 
 interface CreditCardsProps {
   cards: CreditCard[];
@@ -16,7 +17,19 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
   const [isEditing, setIsEditing] = useState(false);
   const [formCard, setFormCard] = useState<Partial<CreditCard>>({ color: 'bg-slate-800' });
   const [selectedCardId, setSelectedCardId] = useState<string | null>(cards[0]?.id || null);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const changeDate = (increment: number) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + increment);
+    setCurrentDate(newDate);
+  };
+
+  const selectedMonth = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  }, [currentDate]);
 
   const handleOpenAddForm = () => {
     setFormCard({ color: 'bg-slate-800' });
@@ -75,21 +88,6 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
   const cardTransactions = selectedCardId ? getTransactionsForCard(selectedCardId, selectedMonth) : [];
   
   const totalInvoice = cardTransactions.reduce((acc, t) => acc + t.amount, 0);
-
-  // Gerar opções de mês (6 meses no passado e 6 no futuro)
-  const generateMonthOptions = () => {
-    const options = [];
-    const today = new Date();
-    for (let i = -6; i <= 6; i++) {
-      const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-      const value = d.toISOString().slice(0, 7);
-      const label = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-      options.push({ value, label: label.charAt(0).toUpperCase() + label.slice(1) });
-    }
-    return options;
-  };
-
-  const monthOptions = generateMonthOptions();
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -213,17 +211,17 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  {/* Seletor de Mês */}
-                  <div>
-                    <select
-                      value={selectedMonth}
-                      onChange={(e) => setSelectedMonth(e.target.value)}
-                      className="px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 outline-none text-sm font-medium text-gray-700"
-                    >
-                      {monthOptions.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
+                  {/* Navegação por Mês */}
+                  <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+                    <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                      <ChevronLeft size={20} />
+                    </button>
+                    <div className="px-4 py-1 text-center min-w-[140px] font-medium text-gray-700">
+                      {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
+                    </div>
+                    <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                      <ChevronRight size={20} />
+                    </button>
                   </div>
                   
                   {/* Total da Fatura */}

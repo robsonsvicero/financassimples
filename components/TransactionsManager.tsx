@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction, Category, CreditCard } from '../types';
-import { Pencil, Trash2, Search, Filter, Calendar, CreditCard as CreditCardIcon, ChevronDown, ChevronUp } from 'lucide-react';
-import { ICON_MAP } from '../constants';
+import { Pencil, Trash2, Search, Filter, CreditCard as CreditCardIcon, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ICON_MAP, MONTH_NAMES } from '../constants';
 
 interface TransactionsManagerProps {
   transactions: Transaction[];
@@ -31,18 +31,22 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
   onEdit,
   onDelete,
 }) => {
-  // Obtém o mês atual no formato YYYY-MM
-  const getCurrentMonth = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}`;
-  };
-
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
-  const [filterMonth, setFilterMonth] = useState(getCurrentMonth());
   const [expandedInvoices, setExpandedInvoices] = useState<Set<string>>(new Set());
+
+  const changeDate = (increment: number) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + increment);
+    setCurrentDate(newDate);
+  };
+
+  const filterMonth = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  }, [currentDate]);
 
   const displayItems = useMemo(() => {
     // Primeiro, filtra as transações
@@ -190,15 +194,17 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
             </select>
           </div>
 
-          {/* Filtro por mês */}
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="month"
-              value={filterMonth}
-              onChange={(e) => setFilterMonth(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500 outline-none"
-            />
+          {/* Navegação por mês */}
+          <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+            <button onClick={() => changeDate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+              <ChevronLeft size={20} />
+            </button>
+            <div className="px-4 py-1 text-center min-w-[140px] font-medium text-gray-700">
+              {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
+            </div>
+            <button onClick={() => changeDate(1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       </div>
