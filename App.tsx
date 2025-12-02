@@ -8,6 +8,7 @@ import BudgetAnalysis from './components/BudgetAnalysis';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Auth from './components/Auth';
+import LoadingScreen from './components/LoadingScreen';
 import * as ApiService from './services/api';
 import { supabase } from './services/supabaseClient';
 
@@ -28,12 +29,12 @@ const App: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     
-    // Simplificado: só desliga loading após 2 segundos ou quando auth mudar
+    // Simplificado: só desliga loading após 10 segundos ou quando auth mudar
     const loadingTimeout = setTimeout(() => {
       if (isMounted && isLoading) {
         setIsLoading(false);
       }
-    }, 2000);
+    }, 50000);
 
     // Listen for auth changes
     if (supabase) {
@@ -288,11 +289,7 @@ const App: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!currentUser) {
