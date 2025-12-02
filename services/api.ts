@@ -263,16 +263,13 @@ export const listAllUsers = async (): Promise<User[]> => {
 export const deleteUser = async (userId: string) => {
   const client = checkSupabase();
   
-  // Deleta todos os dados do usuário
-  await client.from('transactions').delete().eq('user_id', userId);
-  await client.from('credit_cards').delete().eq('user_id', userId);
-  await client.from('categories').delete().eq('user_id', userId);
-  await client.from('budgets').delete().eq('user_id', userId);
+  // Usa função RPC para deletar completamente (dados + profile + auth)
+  const { error } = await client.rpc('delete_user_completely', {
+    user_id_to_delete: userId
+  });
   
-  // Deleta perfil do usuário (o trigger vai deletar da auth automaticamente)
-  const { error: profileError } = await client.from('profiles').delete().eq('id', userId);
-  
-  if (profileError) {
-    throw new Error(`Erro ao deletar usuário: ${profileError.message}`);
+  if (error) {
+    console.error('Erro ao deletar usuário:', error);
+    throw new Error(`Erro ao deletar usuário: ${error.message}`);
   }
 };
