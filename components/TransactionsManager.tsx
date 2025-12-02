@@ -138,8 +138,8 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
   const getCategoryIcon = (category: string) => {
     const cat = categories.find(c => c.id === category);
     if (!cat?.icon) return null;
-    const IconComponent = ICON_MAP[cat.icon];
-    return IconComponent ? <IconComponent size={16} className={cat.color} /> : null;
+    const icon = ICON_MAP[cat.icon];
+    return icon ? <FontAwesomeIcon icon={icon} className={cat.color} size="sm" /> : null;
   };
 
   const formatCurrency = (value: number) => {
