@@ -12,27 +12,32 @@ const checkSupabase = () => {
 // --- Auth Helpers ---
 
 export const getCurrentUser = async (): Promise<User | null> => {
-  if (!supabase) return null;
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) return null;
+  try {
+    if (!supabase) return null;
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return null;
 
-  // Fetch profile details
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', session.user.id)
-    .single();
+    // Fetch profile details
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
 
-  const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
+    const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
 
-  return {
-    id: session.user.id,
-    email: session.user.email!,
-    name: profile?.name || session.user.user_metadata?.name || 'Usuário',
-    avatar: profile?.avatar_url,
-    isAdmin
-  };
+    return {
+      id: session.user.id,
+      email: session.user.email!,
+      name: profile?.name || session.user.user_metadata?.name || 'Usuário',
+      avatar: profile?.avatar_url,
+      isAdmin
+    };
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
 };
 
 export const signOut = async () => {
@@ -237,14 +242,15 @@ export const updateUserProfile = async (userId: string, name: string, avatar: st
 export const listAllUsers = async (): Promise<User[]> => {
   const client = checkSupabase();
   
-  // Busca todos os perfis
+  // Busca todos os perfis com email
   const { data: profiles, error } = await client
     .from('profiles')
-    .select('*')
+    .select('id, name, avatar_url, email')
     .order('created_at', { ascending: false });
   
   if (error) throw error;
   
+  // Mapeia os perfis para o formato User
   return (profiles || []).map(profile => ({
     id: profile.id,
     email: profile.email || 'Email não disponível',

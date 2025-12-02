@@ -20,7 +20,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       if (isRegistering) {
         if (!name || !email || !password) return;
@@ -61,8 +61,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
           {isRegistering && (
             <div className="animate-fade-in">
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/50 focus:ring-2 focus:ring-violet-500 outline-none transition-all shadow-sm text-gray-800"
@@ -71,11 +71,11 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
               />
             </div>
           )}
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/50 focus:ring-2 focus:ring-violet-500 outline-none transition-all shadow-sm text-gray-800"
@@ -83,11 +83,11 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-            <input 
-              type="password" 
+            <input
+              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/50 focus:ring-2 focus:ring-violet-500 outline-none transition-all shadow-sm text-gray-800"
@@ -96,7 +96,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
             />
           </div>
 
-          <button 
+          <button
             type="submit"
             disabled={isLoading}
             className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all active:scale-[0.98] mt-4 flex justify-center items-center"
@@ -143,7 +143,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
         <div className="mt-6 text-center relative z-10">
           <p className="text-sm text-gray-500">
             {isRegistering ? 'Já tem uma conta?' : 'Ainda não tem conta?'}
-            <button 
+            <button
               type="button"
               onClick={() => {
                 setIsRegistering(!isRegistering);
@@ -155,9 +155,11 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
             </button>
           </p>
         </div>
-        
-        <p className="text-center text-xs text-gray-400 mt-8">
-          © 2024 Finanças$imples. Created by Robson Svicero.
+
+        <p className="text-center text-xs text-gray-400 mt-8 flex items-center justify-center gap-1">
+          <span>© 2025 Finanças$imples. Created by</span><a href="https://robsonsvicero.com.br" target="_blank" rel="noopener noreferrer">
+            <img className='h-[24px] opacity-40' src="/logo_Robson Svicero.svg" alt="Robson Svicero" />
+          </a>
         </p>
       </div>
     </div>

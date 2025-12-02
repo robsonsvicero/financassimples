@@ -41,40 +41,27 @@ const App: React.FC = () => {
     }, 3000);
     // Listen for auth changes
     if (supabase) {
-      // Força verificação inicial
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (isMounted) {
-          if (session?.user) {
-            const user = {
-              id: session.user.id,
-              email: session.user.email!,
-              name: session.user.user_metadata?.name || 'Usuário',
-              avatar: session.user.user_metadata?.avatar_url
-            };
-            setCurrentUser(user);
-            loadData(user.id).catch(console.error);
-          } else {
-            setCurrentUser(null);
-          }
-          // Não desliga o loading aqui - deixa o timeout controlar
-        }
-      }).catch(() => {
-        if (isMounted) {
-          setCurrentUser(null);
-          // Não desliga o loading aqui - deixa o timeout controlar
-        }
-      });
-
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-        if (!isMounted) return;
+        if (!isMounted || !supabase) return;
         
         if (session?.user) {
-          const user = {
+          // Busca profile separadamente
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
+          
+          const user: User = {
             id: session.user.id,
             email: session.user.email!,
-            name: session.user.user_metadata?.name || 'Usuário',
-            avatar: session.user.user_metadata?.avatar_url
+            name: profile?.name || session.user.user_metadata?.name || 'Usuário',
+            avatar: profile?.avatar_url,
+            isAdmin
           };
+          
           setCurrentUser(user);
           loadData(user.id).catch(console.error);
         } else {
