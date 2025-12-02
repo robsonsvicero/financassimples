@@ -263,19 +263,12 @@ export const listAllUsers = async (): Promise<User[]> => {
 export const deleteUser = async (userId: string) => {
   const client = checkSupabase();
   
-  console.log('[deleteUser] Chamando RPC para deletar usuário:', userId);
-  
-  // Usa função RPC para deletar completamente (dados + profile + auth)
-  const { data, error } = await client.rpc('delete_user_completely', {
+  // Usa função RPC para deletar completamente (dados + profile + auth via CASCADE)
+  const { error } = await client.rpc('delete_user_completely', {
     user_id_to_delete: userId
   });
   
-  console.log('[deleteUser] Resultado RPC - Data:', data, 'Error:', error);
-  
   if (error) {
-    console.error('[deleteUser] Erro ao deletar usuário:', error);
     throw new Error(`Erro ao deletar usuário: ${error.message}`);
   }
-  
-  console.log('[deleteUser] Usuário deletado com sucesso');
 };
