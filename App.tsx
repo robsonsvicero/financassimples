@@ -273,13 +273,9 @@ const App: React.FC = () => {
         targetMonth += 1;
       }
 
-      // Se a transação tem parcela, extrai o número da descrição
-      let installmentOffset = 0;
-      const match = transaction.description.match(/\((\d+)\/\d+\)/);
-      if (match) {
-        const installmentNumber = parseInt(match[1]);
-        installmentOffset = installmentNumber - 1;
-        targetMonth += installmentOffset;
+      // Se a transação é parcelada, adiciona o offset da parcela
+      if (transaction.installmentCurrent && transaction.installmentCurrent > 1) {
+        targetMonth += (transaction.installmentCurrent - 1);
       }
 
       // Ajusta ano se necessário
