@@ -140,6 +140,15 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
 
   const balance = totalIncome - totalExpense;
 
+  const getDateParts = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return {
+      day,
+      weekday: date.toLocaleDateString('pt-BR', { weekday: 'short' })
+    };
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header / Date Selector */}
@@ -256,10 +265,10 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-col">
                             <span className="font-medium text-gray-700">
-                              {new Date(invoice.dueDate).getDate()}
+                              {getDateParts(invoice.dueDate).day}
                             </span>
                             <span className="text-xs text-gray-400 uppercase">
-                               {new Date(invoice.dueDate).toLocaleDateString('pt-BR', { weekday: 'short' })}
+                               {getDateParts(invoice.dueDate).weekday}
                             </span>
                           </div>
                         </td>
@@ -294,16 +303,17 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
                   // Renderizar transação normal
                   const transaction = item as Transaction;
                   const isExpense = transaction.type === TransactionType.EXPENSE;
+                  const dateParts = getDateParts(transaction.date);
                   
                   return (
                     <tr key={transaction.id} className="hover:bg-white/40 transition-colors group">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col">
                           <span className="font-medium text-gray-700">
-                            {new Date(transaction.date).getDate()}
+                            {dateParts.day}
                           </span>
                           <span className="text-xs text-gray-400 uppercase">
-                             {new Date(transaction.date).toLocaleDateString('pt-BR', { weekday: 'short' })}
+                             {dateParts.weekday}
                           </span>
                         </div>
                       </td>

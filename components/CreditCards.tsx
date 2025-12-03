@@ -282,21 +282,29 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-gray-100">
-                     {cardTransactions.map(t => (
+                     {cardTransactions.map(t => {
+                       const [year, month, day] = t.date.split('-');
+                       const formattedDate = `${day}/${month}/${year}`;
+                       const formattedDueDate = t.dueDate ? (() => {
+                         const [y, m, d] = t.dueDate.split('-');
+                         return `${d}/${m}/${y}`;
+                       })() : '-';
+                       return (
                        <tr key={t.id} className="hover:bg-white/50">
-                         <td className="px-6 py-3 text-gray-600">{new Date(t.date).toLocaleDateString('pt-BR')}</td>
+                         <td className="px-6 py-3 text-gray-600">{formattedDate}</td>
                          <td className="px-6 py-3">
                            <div className="font-medium text-gray-800">{t.description}</div>
                            {t.installmentTotal && <div className="text-xs text-gray-400">{t.installmentCurrent}/{t.installmentTotal}</div>}
                          </td>
                          <td className="px-6 py-3 text-gray-600 font-medium">
-                            {t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : '-'}
+                            {formattedDueDate}
                          </td>
                          <td className="px-6 py-3 text-right font-medium text-gray-800">
                            R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                          </td>
                        </tr>
-                     ))}
+                       );
+                     })}
                    </tbody>
                  </table>
                )}

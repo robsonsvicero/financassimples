@@ -241,10 +241,12 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
                    // Renderizar fatura agrupada
                    if ('type' in item && item.type === 'invoice') {
                      const invoice = item as InvoiceGroup;
+                     const [year, month, day] = invoice.dueDate.split('-');
+                     const formattedDate = `${day}/${month}/${year}`;
                      return (
                        <tr key={invoice.id} className="hover:bg-gray-50 bg-violet-50">
                          <td className="px-6 py-3 text-gray-600">
-                           {new Date(invoice.dueDate).toLocaleDateString()}
+                           {formattedDate}
                          </td>
                          <td className="px-6 py-3 font-medium text-gray-800 flex items-center gap-2">
                            <FontAwesomeIcon icon={faCreditCard} className="text-violet-600" />
