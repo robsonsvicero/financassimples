@@ -108,16 +108,16 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
       return dateB.localeCompare(dateA); // Mais recente primeiro
     });
 
-    // Aplica filtro de mês
-    if (filterMonth) {
-      return items.filter(item => {
-        const date = 'dueDate' in item ? item.dueDate : item.date;
-        return date ? date.startsWith(filterMonth) : false;
-      });
-    }
+    // Filtro de mês desabilitado para mostrar todas as transações
+    // if (filterMonth) {
+    //   return items.filter(item => {
+    //     const date = 'dueDate' in item ? item.dueDate : item.date;
+    //     return date ? date.startsWith(filterMonth) : false;
+    //   });
+    // }
 
     return items;
-  }, [transactions, searchTerm, filterType, filterMonth, cards]);
+  }, [transactions, searchTerm, filterType, cards]);
 
   const toggleInvoice = (invoiceId: string) => {
     setExpandedInvoices(prev => {
