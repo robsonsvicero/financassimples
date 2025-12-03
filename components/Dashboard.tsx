@@ -142,7 +142,8 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
 
   const getDateParts = (dateStr: string) => {
     const [year, month, day] = dateStr.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    // Cria a data em horário local para evitar problemas de timezone
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0);
     return {
       day,
       weekday: date.toLocaleDateString('pt-BR', { weekday: 'short' })
