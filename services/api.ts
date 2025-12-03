@@ -277,6 +277,12 @@ export const deleteUser = async (userId: string) => {
 
 export const addCategory = async (category: Omit<Category, 'id'>, userId: string) => {
   const client = checkSupabase();
+  
+  // Debug: verificar o userId e auth
+  const { data: { user } } = await client.auth.getUser();
+  console.log('Adding category - userId param:', userId);
+  console.log('Adding category - auth.uid():', user?.id);
+  
   const { data, error } = await client.from('categories').insert({
     user_id: userId,
     name: category.name,
@@ -285,7 +291,10 @@ export const addCategory = async (category: Omit<Category, 'id'>, userId: string
     type: category.type
   }).select().single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Category insert error:', error);
+    throw error;
+  }
   return data;
 };
 
