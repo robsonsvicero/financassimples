@@ -142,19 +142,28 @@ const CategoriesManager: React.FC<CategoriesManagerProps> = ({
               </select>
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Ícone</label>
-              <select
-                value={formData.icon}
-                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500 outline-none"
-              >
-                {iconOptions.map((icon) => (
-                  <option key={icon} value={icon}>
-                    {icon}
-                  </option>
-                ))}
-              </select>
+              <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-xl">
+                {iconOptions.map((iconName) => {
+                  const IconComponent = ICON_MAP[iconName];
+                  return (
+                    <button
+                      key={iconName}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, icon: iconName })}
+                      className={`p-3 rounded-lg border-2 transition-all hover:scale-110 ${
+                        formData.icon === iconName
+                          ? 'border-violet-600 bg-violet-50 shadow-md'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      title={iconName}
+                    >
+                      <FontAwesomeIcon icon={IconComponent} className={formData.icon === iconName ? 'text-violet-600' : 'text-gray-600'} />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>

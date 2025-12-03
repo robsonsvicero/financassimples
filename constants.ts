@@ -2,7 +2,7 @@ import { Category, CreditCard } from './types';
 import { 
   faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
   faHeartPulse, faGraduationCap, faPlane, faShirt, faCartShopping, 
-  faPaperclip, faEllipsis, faDollarSign
+  faPaperclip, faEllipsis, faDollarSign, faCar
 } from '@fortawesome/free-solid-svg-icons';
 
 export const INITIAL_CATEGORIES: Category[] = [
@@ -26,7 +26,7 @@ export const INITIAL_CATEGORIES: Category[] = [
 export const ICON_MAP: Record<string, any> = {
   faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
   faHeartPulse, faGraduationCap, faPlane, faShirt, faCartShopping, 
-  faPaperclip, faEllipsis, faDollarSign
+  faPaperclip, faEllipsis, faDollarSign, faCar
 };
 
 export const MOCK_CARDS: CreditCard[] = [
