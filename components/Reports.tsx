@@ -261,10 +261,12 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
                    
                    // Renderizar transação normal
                    const transaction = item as Transaction;
+                   const [year, month, day] = transaction.date.split('-');
+                   const transactionFormattedDate = `${day}/${month}/${year}`;
                    return (
                      <tr key={transaction.id} className="hover:bg-gray-50">
                        <td className="px-6 py-3 text-gray-600">
-                         {new Date(transaction.date).toLocaleDateString()}
+                         {transactionFormattedDate}
                        </td>
                        <td className="px-6 py-3 font-medium text-gray-800">
                          {transaction.description}

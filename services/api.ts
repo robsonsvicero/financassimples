@@ -84,8 +84,8 @@ export const fetchData = async (userId: string) => {
     id: t.id,
     description: t.description,
     amount: Number(t.amount),
-    date: t.date,
-    dueDate: t.due_date,
+    date: typeof t.date === 'string' && t.date.includes('T') ? t.date.split('T')[0] : t.date,
+    dueDate: t.due_date && typeof t.due_date === 'string' && t.due_date.includes('T') ? t.due_date.split('T')[0] : t.due_date,
     type: t.type,
     expenseType: t.expense_type,
     category: t.category_id,
@@ -128,8 +128,8 @@ export const addTransactions = async (transactions: Transaction[], userId: strin
     user_id: userId,
     description: t.description,
     amount: t.amount,
-    date: t.date,
-    due_date: t.dueDate,
+    date: t.date + 'T12:00:00', // Adiciona horário meio-dia para evitar conversão de timezone
+    due_date: t.dueDate ? t.dueDate + 'T12:00:00' : null,
     type: t.type,
     expense_type: t.expenseType,
     category_id: t.category,
@@ -157,14 +157,14 @@ export const updateTransaction = async (transaction: Transaction) => {
   const dbPayload: any = {
     amount: transaction.amount,
     description: transaction.description,
-    date: transaction.date,
+    date: transaction.date.includes('T') ? transaction.date : transaction.date + 'T12:00:00',
     type: transaction.type,
     payment_method: transaction.paymentMethod,
     is_paid: transaction.isPaid || false
   };
 
   if (transaction.dueDate) {
-    dbPayload.due_date = transaction.dueDate;
+    dbPayload.due_date = transaction.dueDate.includes('T') ? transaction.dueDate : transaction.dueDate + 'T12:00:00';
   }
 
   if (transaction.category) {

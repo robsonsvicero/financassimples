@@ -102,8 +102,8 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
 
     // Ordena por data (dueDate para faturas, date para outras)
     items.sort((a, b) => {
-      const dateA = 'dueDate' in a ? a.dueDate : a.date;
-      const dateB = 'dueDate' in b ? b.dueDate : b.date;
+      const dateA = ('type' in a && a.type === 'invoice') ? a.dueDate : (a as Transaction).date;
+      const dateB = ('type' in b && b.type === 'invoice') ? b.dueDate : (b as Transaction).date;
       if (!dateA || !dateB) return 0;
       return dateB.localeCompare(dateA); // Mais recente primeiro
     });
@@ -111,7 +111,7 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
     // Aplica filtro de mês se selecionado
     if (filterMonth) {
       return items.filter(item => {
-        const date = 'dueDate' in item ? item.dueDate : item.date;
+        const date = ('type' in item && item.type === 'invoice') ? item.dueDate : (item as Transaction).date;
         return date ? date.startsWith(filterMonth) : false;
       });
     }
