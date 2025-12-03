@@ -20,6 +20,11 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onRecalculateDu
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [saved, setSaved] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -51,6 +56,64 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onRecalculateDu
       } finally {
         setIsRecalculating(false);
       }
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess(false);
+
+    // Validações
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Preencha todos os campos');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError('A nova senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('As senhas não coincidem');
+      return;
+    }
+
+    try {
+      // Importa o supabase
+      const { supabase } = await import('../services/supabaseClient');
+      
+      // Verifica a senha atual fazendo login
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword
+      });
+
+      if (signInError) {
+        setPasswordError('Senha atual incorreta');
+        return;
+      }
+
+      // Atualiza a senha
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (updateError) {
+        setPasswordError('Erro ao atualizar senha: ' + updateError.message);
+        return;
+      }
+
+      // Sucesso
+      setPasswordSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordSuccess(false), 5000);
+    } catch (error) {
+      setPasswordError('Erro ao alterar senha');
+      console.error(error);
     }
   };
 
@@ -324,6 +387,64 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onRecalculateDu
                  </div>
                )}
              </div>
+          </form>
+       </div>
+
+       {/* Alterar Senha */}
+       <div className="glass-card p-8 rounded-3xl mt-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Alterar Senha</h3>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Senha Atual</label>
+               <input 
+                 type="password" 
+                 value={currentPassword} 
+                 onChange={(e) => setCurrentPassword(e.target.value)}
+                 className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:ring-2 focus:ring-violet-500 outline-none text-gray-800" 
+                 placeholder="Digite sua senha atual"
+               />
+             </div>
+
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
+               <input 
+                 type="password" 
+                 value={newPassword} 
+                 onChange={(e) => setNewPassword(e.target.value)}
+                 className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:ring-2 focus:ring-violet-500 outline-none text-gray-800" 
+                 placeholder="Mínimo 6 caracteres"
+               />
+             </div>
+
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
+               <input 
+                 type="password" 
+                 value={confirmPassword} 
+                 onChange={(e) => setConfirmPassword(e.target.value)}
+                 className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:ring-2 focus:ring-violet-500 outline-none text-gray-800" 
+                 placeholder="Digite novamente a nova senha"
+               />
+             </div>
+
+             {passwordError && (
+               <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                 {passwordError}
+               </div>
+             )}
+
+             {passwordSuccess && (
+               <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+                 ✓ Senha alterada com sucesso!
+               </div>
+             )}
+
+             <button 
+               type="submit" 
+               className="w-full py-3 bg-violet-600 text-white rounded-xl font-medium hover:bg-violet-700 transition-all"
+             >
+               Alterar Senha
+             </button>
           </form>
        </div>
 
