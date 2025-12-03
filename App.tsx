@@ -248,6 +248,66 @@ const App: React.FC = () => {
     }
   };
 
+  const handleRecalculateDueDates = async () => {
+    if (!currentUser) return;
+    
+    // Filtra apenas transações de crédito com cartão
+    const creditTransactions = transactions.filter(
+      t => t.paymentMethod === 'CREDIT' && t.type === 'EXPENSE' && t.creditCardId && t.date
+    );
+
+    const updatedTransactions: Transaction[] = [];
+
+    creditTransactions.forEach(transaction => {
+      const card = cards.find(c => c.id === transaction.creditCardId);
+      if (!card) return;
+
+      const purchaseDate = new Date(transaction.date + 'T12:00:00');
+      const purchaseDay = purchaseDate.getDate();
+      
+      let targetMonth = purchaseDate.getMonth();
+      let targetYear = purchaseDate.getFullYear();
+
+      // Lógica corrigida: >= (no dia do fechamento ou depois vai para próximo mês)
+      if (purchaseDay >= card.closingDay) {
+        targetMonth += 1;
+      }
+
+      // Se a transação é parcelada, adiciona o offset da parcela
+      if (transaction.installmentCurrent && transaction.installmentCurrent > 1) {
+        targetMonth += (transaction.installmentCurrent - 1);
+      }
+
+      // Ajusta ano se necessário
+      while (targetMonth > 11) {
+        targetMonth -= 12;
+        targetYear += 1;
+      }
+      while (targetMonth < 0) {
+        targetMonth += 12;
+        targetYear -= 1;
+      }
+
+      const newDueDate = new Date(targetYear, targetMonth, card.dueDay).toISOString().split('T')[0];
+
+      // Se a data mudou, adiciona à lista de atualizações
+      if (transaction.dueDate !== newDueDate) {
+        updatedTransactions.push({
+          ...transaction,
+          dueDate: newDueDate
+        });
+      }
+    });
+
+    // Atualiza as transações que mudaram
+    if (updatedTransactions.length > 0) {
+      await Promise.all(
+        updatedTransactions.map(t => ApiService.updateTransaction(t))
+      );
+      loadData(currentUser.id);
+    }
+  };
+
   const handleAddCard = async (card: CreditCard) => {
     if (!currentUser) return;
     try {
@@ -371,7 +431,7 @@ const App: React.FC = () => {
       case 'users':
         return currentUser ? <UserManagement currentUser={currentUser} /> : null;
       case 'settings':
-        return <Settings user={currentUser} onUpdateUser={handleUpdateUser} />;
+        return <Settings user={currentUser} onUpdateUser={handleUpdateUser} onRecalculateDueDates={handleRecalculateDueDates} />;
       default:
         return <Dashboard transactions={transactions} cards={cards} onDelete={handleDeleteTransaction} />;
     }

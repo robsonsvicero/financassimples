@@ -6,9 +6,10 @@ import { faCamera, faSave, faUpload, faMagnifyingGlassPlus, faMagnifyingGlassMin
 interface SettingsProps {
   user: User | null;
   onUpdateUser: (user: User) => void;
+  onRecalculateDueDates?: () => Promise<void>;
 }
 
-const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
+const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onRecalculateDueDates }) => {
   const [name, setName] = useState(user?.name || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || '');
   const [showImageEditor, setShowImageEditor] = useState(false);
@@ -18,6 +19,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [saved, setSaved] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -28,6 +30,27 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
       onUpdateUser({ ...user, name, avatar: avatarUrl });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+    }
+  };
+
+  const handleRecalculate = async () => {
+    if (!onRecalculateDueDates) return;
+    
+    const confirmed = window.confirm(
+      'Isso irá recalcular as datas de vencimento de todas as transações de crédito baseado no dia de fechamento dos cartões. Deseja continuar?'
+    );
+    
+    if (confirmed) {
+      setIsRecalculating(true);
+      try {
+        await onRecalculateDueDates();
+        alert('Datas recalculadas com sucesso!');
+      } catch (error) {
+        alert('Erro ao recalcular datas');
+        console.error(error);
+      } finally {
+        setIsRecalculating(false);
+      }
     }
   };
 
@@ -303,6 +326,22 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser }) => {
              </div>
           </form>
        </div>
+
+       {onRecalculateDueDates && (
+         <div className="glass-card p-8 rounded-3xl mt-6">
+           <h3 className="text-lg font-semibold text-gray-800 mb-4">Manutenção de Dados</h3>
+           <p className="text-sm text-gray-600 mb-4">
+             Recalcula as datas de vencimento das faturas de crédito com base no dia de fechamento correto (compras no dia do fechamento ou depois vão para o próximo mês).
+           </p>
+           <button
+             onClick={handleRecalculate}
+             disabled={isRecalculating}
+             className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
+           >
+             {isRecalculating ? 'Recalculando...' : 'Recalcular Datas de Vencimento'}
+           </button>
+         </div>
+       )}
     </div>
   );
 };
