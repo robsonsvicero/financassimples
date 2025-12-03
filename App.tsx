@@ -336,15 +336,33 @@ const App: React.FC = () => {
         return (
           <CategoriesManager
             categories={categories}
-            onAdd={(cat) => {
-              const newCat = { ...cat, id: Date.now().toString() };
-              setCategories([...categories, newCat]);
+            onAdd={async (cat) => {
+              if (!currentUser) return;
+              try {
+                const newCat = await ApiService.addCategory(cat, currentUser.id);
+                setCategories([...categories, { ...cat, id: newCat.id }]);
+              } catch (error) {
+                console.error('Error adding category:', error);
+                alert('Erro ao adicionar categoria');
+              }
             }}
-            onEdit={(cat) => {
-              setCategories(categories.map(c => c.id === cat.id ? cat : c));
+            onEdit={async (cat) => {
+              try {
+                await ApiService.updateCategory(cat);
+                setCategories(categories.map(c => c.id === cat.id ? cat : c));
+              } catch (error) {
+                console.error('Error updating category:', error);
+                alert('Erro ao atualizar categoria');
+              }
             }}
-            onDelete={(id) => {
-              setCategories(categories.filter(c => c.id !== id));
+            onDelete={async (id) => {
+              try {
+                await ApiService.deleteCategory(id);
+                setCategories(categories.filter(c => c.id !== id));
+              } catch (error) {
+                console.error('Error deleting category:', error);
+                alert('Erro ao deletar categoria');
+              }
             }}
           />
         );

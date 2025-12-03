@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Transaction, CreditCard, Budget, User } from '../types';
+import { Transaction, CreditCard, Budget, User, Category } from '../types';
 import { INITIAL_CATEGORIES } from '../constants';
 
 const checkSupabase = () => {
@@ -271,4 +271,41 @@ export const deleteUser = async (userId: string) => {
   if (error) {
     throw new Error(`Erro ao deletar usuário: ${error.message}`);
   }
+};
+
+// --- Category Operations ---
+
+export const addCategory = async (category: Omit<Category, 'id'>, userId: string) => {
+  const client = checkSupabase();
+  const { data, error } = await client.from('categories').insert({
+    user_id: userId,
+    name: category.name,
+    icon: category.icon,
+    color: category.color,
+    type: category.type
+  }).select().single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const updateCategory = async (category: Category) => {
+  const client = checkSupabase();
+  const { error } = await client
+    .from('categories')
+    .update({
+      name: category.name,
+      icon: category.icon,
+      color: category.color,
+      type: category.type
+    })
+    .eq('id', category.id);
+    
+  if (error) throw error;
+};
+
+export const deleteCategory = async (id: string) => {
+  const client = checkSupabase();
+  const { error } = await client.from('categories').delete().eq('id', id);
+  if (error) throw error;
 };
