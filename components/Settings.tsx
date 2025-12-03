@@ -84,6 +84,11 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onRecalculateDu
       // Importa o supabase
       const { supabase } = await import('../services/supabaseClient');
       
+      if (!supabase) {
+        setPasswordError('Erro ao conectar com o servidor');
+        return;
+      }
+      
       // Verifica a senha atual fazendo login
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user?.email || '',
