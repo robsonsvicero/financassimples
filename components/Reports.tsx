@@ -136,8 +136,8 @@ const Reports: React.FC<ReportsProps> = ({ transactions, cards }) => {
           item.dueDate.split('-').reverse().join('/'),
           item.cardName,
           'Fatura Cartão',
-          `R$ ${item.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-          '-'
+          '-',
+          `R$ ${item.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
         ];
       } else {
         const transaction = item as Transaction;
