@@ -105,8 +105,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
        let targetMonth = pDate.getMonth();
        let targetYear = pDate.getFullYear();
 
-       // Billing Cycle Logic: se a compra foi DEPOIS do fechamento, vai para o próximo mês
-       if (purchaseDay > card.closingDay) {
+       // Billing Cycle Logic: se a compra foi no dia do fechamento ou depois, vai para o próximo mês
+       if (purchaseDay >= card.closingDay) {
           targetMonth += 1;
        }
        
