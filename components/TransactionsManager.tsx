@@ -94,6 +94,13 @@ const TransactionsManager: React.FC<TransactionsManagerProps> = ({
       }
     });
 
+    // Ordena as transações dentro de cada fatura por data (mais recente primeiro)
+    invoiceMap.forEach(invoice => {
+      invoice.transactions.sort((a, b) => {
+        return b.date.localeCompare(a.date);
+      });
+    });
+
     // Combina faturas e outras transações
     const items: DisplayItem[] = [
       ...Array.from(invoiceMap.values()),
