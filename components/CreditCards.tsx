@@ -82,7 +82,7 @@ const CreditCards: React.FC<CreditCardsProps> = ({ cards, transactions, onAddCar
         return t.dueDate.startsWith(month);
       }
       return false;
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Mais recente primeiro
   };
 
   const selectedCard = cards.find(c => c.id === selectedCardId);
