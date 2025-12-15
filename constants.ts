@@ -24,10 +24,7 @@ export const INITIAL_CATEGORIES: Category[] = [
   { id: '16', name: 'Salário', icon: 'faDollarSign', color: 'text-green-600', type: 'INCOME' },
 ];
 
-  faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
-  faHeartPulse, faGraduationCap, faPlane, faShirt, faCartShopping, 
-  faPaperclip, faEllipsis, faDollarSign, faCar, faGasPump, faMobileScreenButton
-};
+
 
 export const MOCK_CARDS: CreditCard[] = [
   { id: 'c1', name: 'Nubank', closingDay: 25, dueDay: 3, color: 'bg-purple-600' },
