@@ -1,3 +1,23 @@
+export const ICON_MAP: Record<string, any> = {
+  faReceipt,
+  faBus,
+  faWifi,
+  faDroplet,
+  faBolt,
+  faHouse,
+  faUtensils,
+  faHeartPulse,
+  faGraduationCap,
+  faPlane,
+  faShirt,
+  faCartShopping,
+  faPaperclip,
+  faEllipsis,
+  faDollarSign,
+  faCar,
+  faGasPump,
+  faMobileScreenButton
+};
 import { Category, CreditCard } from './types';
 import { 
   faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
