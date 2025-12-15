@@ -16,5 +16,8 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: '0.0.0.0'
     },
+    build: {
+      chunkSizeWarningLimit: 1500 // aumenta o limite para 1.5MB
+    }
   }
 })
