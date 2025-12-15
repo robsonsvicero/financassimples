@@ -2,7 +2,7 @@ import { Category, CreditCard } from './types';
 import { 
   faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
   faHeartPulse, faGraduationCap, faPlane, faShirt, faCartShopping, 
-  faPaperclip, faEllipsis, faDollarSign, faCar, faGasPump
+  faPaperclip, faEllipsis, faDollarSign, faCar, faGasPump, faMobileScreenButton
 } from '@fortawesome/free-solid-svg-icons';
 
 export const INITIAL_CATEGORIES: Category[] = [
@@ -19,14 +19,14 @@ export const INITIAL_CATEGORIES: Category[] = [
   { id: '11', name: 'Vestuário', icon: 'faShirt', color: 'text-teal-500', type: 'EXPENSE' },
   { id: '12', name: 'Supermercado', icon: 'faCartShopping', color: 'text-emerald-600', type: 'EXPENSE' },
   { id: '13', name: 'Material de Escritório', icon: 'faPaperclip', color: 'text-gray-500', type: 'EXPENSE' },
-  { id: '14', name: 'Outros', icon: 'faEllipsis', color: 'text-slate-500', type: 'BOTH' },
-  { id: '15', name: 'Salário', icon: 'faDollarSign', color: 'text-green-600', type: 'INCOME' },
+  { id: '14', name: 'Celular', icon: 'faMobileScreenButton', color: 'text-lime-500', type: 'EXPENSE' },
+  { id: '15', name: 'Outros', icon: 'faEllipsis', color: 'text-slate-500', type: 'BOTH' },
+  { id: '16', name: 'Salário', icon: 'faDollarSign', color: 'text-green-600', type: 'INCOME' },
 ];
 
-export const ICON_MAP: Record<string, any> = {
   faReceipt, faBus, faWifi, faDroplet, faBolt, faHouse, faUtensils, 
   faHeartPulse, faGraduationCap, faPlane, faShirt, faCartShopping, 
-  faPaperclip, faEllipsis, faDollarSign, faCar, faGasPump
+  faPaperclip, faEllipsis, faDollarSign, faCar, faGasPump, faMobileScreenButton
 };
 
 export const MOCK_CARDS: CreditCard[] = [

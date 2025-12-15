@@ -25,11 +25,13 @@ interface InvoiceGroup {
 
 type DisplayItem = Transaction | InvoiceGroup;
 
+
 const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const viewMode = 'month';
   const [tip, setTip] = useState<string>('');
   const [tipLoaded, setTipLoaded] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
 
   useEffect(() => {
     if (!tipLoaded) {
@@ -75,10 +77,8 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
 
     // Agrupa transações de crédito por cartão e data de vencimento
     const invoiceMap = new Map<string, InvoiceGroup>();
-    
     creditTransactions.forEach(transaction => {
       const key = `${transaction.creditCardId}-${transaction.dueDate}`;
-      
       if (!invoiceMap.has(key)) {
         const card = cards.find(c => c.id === transaction.creditCardId);
         invoiceMap.set(key, {
@@ -93,7 +93,6 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
           isPaid: true
         });
       }
-      
       const invoice = invoiceMap.get(key)!;
       invoice.amount += transaction.amount;
       invoice.count += 1;
@@ -103,21 +102,55 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
     });
 
     // Combina faturas e outras transações
-    const items: DisplayItem[] = [
+    let items: DisplayItem[] = [
       ...Array.from(invoiceMap.values()),
       ...otherTransactions
     ];
 
-    // Ordena por data (dueDate para faturas, date para outras)
-    items.sort((a, b) => {
-      const dateA = 'dueDate' in a ? a.dueDate : a.date;
-      const dateB = 'dueDate' in b ? b.dueDate : b.date;
-      if (!dateA || !dateB) return 0;
-      return dateB.localeCompare(dateA);
+    // Ordenação dinâmica
+    const { key, direction } = sortConfig;
+    items = [...items].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+      switch (key) {
+        case 'date':
+          aValue = 'dueDate' in a ? a.dueDate : a.date;
+          bValue = 'dueDate' in b ? b.dueDate : b.date;
+          break;
+        case 'description':
+          aValue = 'type' in a && a.type === 'invoice' ? a.cardName : (a as Transaction).description;
+          bValue = 'type' in b && b.type === 'invoice' ? b.cardName : (b as Transaction).description;
+          break;
+        case 'category':
+          aValue = 'type' in a && a.type === 'invoice' ? 'Fatura Cartão' : (a as Transaction).paymentMethod;
+          bValue = 'type' in b && b.type === 'invoice' ? 'Fatura Cartão' : (b as Transaction).paymentMethod;
+          break;
+        case 'amount':
+          aValue = 'type' in a && a.type === 'invoice' ? a.amount : (a as Transaction).amount;
+          bValue = 'type' in b && b.type === 'invoice' ? b.amount : (b as Transaction).amount;
+          break;
+        case 'status':
+          aValue = 'type' in a && a.type === 'invoice' ? a.isPaid : (a as Transaction).isPaid;
+          bValue = 'type' in b && b.type === 'invoice' ? b.isPaid : (b as Transaction).isPaid;
+          break;
+        default:
+          aValue = 0;
+          bValue = 0;
+      }
+      if (aValue === undefined || bValue === undefined) return 0;
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+        return direction === 'asc' ? Number(aValue) - Number(bValue) : Number(bValue) - Number(aValue);
+      }
+      return 0;
     });
-
     return items;
-  }, [transactions, currentMonth, cards]);
+  }, [transactions, currentMonth, cards, sortConfig]);
 
   // Totals
   const totalIncome = useMemo(() => {
@@ -242,11 +275,21 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, cards }) => {
           <table className="w-full text-left text-sm text-gray-600 min-w-[600px]">
             <thead className="bg-gray-50/50 text-gray-500 font-medium uppercase text-xs tracking-wider">
               <tr>
-                <th className="px-3 sm:px-6 py-4">Data</th>
-                <th className="px-3 sm:px-6 py-4">Descrição</th>
-                <th className="px-3 sm:px-6 py-4">Categoria</th>
-                <th className="px-3 sm:px-6 py-4 text-right">Valor</th>
-                <th className="px-3 sm:px-6 py-4 text-center">Status</th>
+                <th className="px-3 sm:px-6 py-4 cursor-pointer select-none" onClick={() => setSortConfig(prev => ({ key: 'date', direction: prev.key === 'date' && prev.direction === 'desc' ? 'asc' : 'desc' }))}>
+                  Data {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </th>
+                <th className="px-3 sm:px-6 py-4 cursor-pointer select-none" onClick={() => setSortConfig(prev => ({ key: 'description', direction: prev.key === 'description' && prev.direction === 'desc' ? 'asc' : 'desc' }))}>
+                  Descrição {sortConfig.key === 'description' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </th>
+                <th className="px-3 sm:px-6 py-4 cursor-pointer select-none" onClick={() => setSortConfig(prev => ({ key: 'category', direction: prev.key === 'category' && prev.direction === 'desc' ? 'asc' : 'desc' }))}>
+                  Categoria {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </th>
+                <th className="px-3 sm:px-6 py-4 text-right cursor-pointer select-none" onClick={() => setSortConfig(prev => ({ key: 'amount', direction: prev.key === 'amount' && prev.direction === 'desc' ? 'asc' : 'desc' }))}>
+                  Valor {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </th>
+                <th className="px-3 sm:px-6 py-4 text-center cursor-pointer select-none" onClick={() => setSortConfig(prev => ({ key: 'status', direction: prev.key === 'status' && prev.direction === 'desc' ? 'asc' : 'desc' }))}>
+                  Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
