@@ -40,112 +40,27 @@ export const fetchData = async (userId: string) => {
     category: t.category_id,
     paymentMethod: t.payment_method,
     creditCardId: t.credit_card_id,
-    installmentTotal: t.installment_total,
-    installmentCurrent: t.installment_current,
-    parentId: t.parent_id,
-    isPaid: t.is_paid
-  }));
-  const mappedCards: CreditCard[] = (cards || []).map((c: any) => ({
-    id: c._id?.toString() || c.id,
-    name: c.name,
-    closingDay: c.closing_day,
-    dueDay: c.due_day,
-    color: c.color,
-    limit: c.limit_amount ? Number(c.limit_amount) : undefined
-  }));
-  const mappedBudgets: Budget[] = (budgets || []).map((b: any) => ({
-    categoryId: b.category_id,
-    amount: Number(b.amount),
-    month: b.month
-  }));
-  return {
-    transactions: mappedTransactions,
-    cards: mappedCards,
-    categories: allCategories,
-    budgets: mappedBudgets
-  };
-};
 
-// --- CRUD Operations ---
-export const addTransactions = async (transactions: Transaction[], userId: string) => {
-  const db = await getMongoDb();
-  const dbPayload = transactions.map(t => ({
-    user_id: userId,
-    description: t.description,
-    amount: t.amount,
-    date: t.date + 'T12:00:00',
-    due_date: t.dueDate ? t.dueDate + 'T12:00:00' : null,
-    type: t.type,
-    expense_type: t.expenseType,
-    category_id: t.category,
-    payment_method: t.paymentMethod,
-    credit_card_id: t.creditCardId || null,
-    installment_total: t.installmentTotal,
-    installment_current: t.installmentCurrent,
-    parent_id: t.parentId,
-    is_paid: t.isPaid
-  }));
-  await db.collection('transactions').insertMany(dbPayload);
-};
+    // Exemplo de uso correto no frontend:
+    const BACKEND_URL = 'https://mongodb-production-dab3.up.railway.app';
 
-export const deleteTransaction = async (id: string) => {
-  const db = await getMongoDb();
-  await db.collection('transactions').deleteOne({ _id: new ObjectId(id) });
-};
+    export const fetchData = async (userId) => {
+      const res = await fetch(`${BACKEND_URL}/api/data?userId=${userId}`);
+      if (!res.ok) throw new Error('Erro ao buscar dados');
+      return await res.json();
+    };
 
-export const updateTransaction = async (transaction: Transaction) => {
-  const db = await getMongoDb();
-  const dbPayload: any = {
-    amount: transaction.amount,
-    description: transaction.description,
-    date: transaction.date.includes('T') ? transaction.date : transaction.date + 'T12:00:00',
-    type: transaction.type,
-    payment_method: transaction.paymentMethod,
-    is_paid: transaction.isPaid || false
-  };
-  if (transaction.dueDate) {
-    dbPayload.due_date = transaction.dueDate.includes('T') ? transaction.dueDate : transaction.dueDate + 'T12:00:00';
-  }
-  if (transaction.category) {
-    dbPayload.category_id = transaction.category;
-  }
-  if (transaction.creditCardId) {
-    dbPayload.credit_card_id = transaction.creditCardId;
-  }
-  await db.collection('transactions').updateOne(
-    { _id: new ObjectId(transaction.id) },
-    { $set: dbPayload }
-  );
-};
+    export const addTransactions = async (transactions, userId) => {
+      const res = await fetch(`${BACKEND_URL}/api/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactions, userId })
+      });
+      if (!res.ok) throw new Error('Erro ao adicionar transação');
+      return await res.json();
+    };
 
-export const addCard = async (card: CreditCard, userId: string) => {
-  const db = await getMongoDb();
-  const result = await db.collection('credit_cards').insertOne({
-    user_id: userId,
-    name: card.name,
-    closing_day: card.closingDay,
-    due_day: card.dueDay,
-    color: card.color,
-    limit_amount: card.limit
-  });
-  return { ...card, id: result.insertedId.toString() };
-};
-
-export const updateCard = async (card: CreditCard) => {
-  const db = await getMongoDb();
-  await db.collection('credit_cards').updateOne(
-    { _id: new ObjectId(card.id) },
-    { $set: {
-      name: card.name,
-      closing_day: card.closingDay,
-      due_day: card.dueDay,
-      color: card.color
-    }}
-  );
-};
-
-export const deleteCard = async (id: string) => {
-  const db = await getMongoDb();
+    // Implemente funções semelhantes para update, delete, etc., sempre usando fetch para a API backend.
   await db.collection('credit_cards').deleteOne({ _id: new ObjectId(id) });
 };
 
