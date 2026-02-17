@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { User, Transaction, CreditCard, Budget, Category } from './types';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
@@ -12,8 +12,9 @@ import Auth from './components/Auth';
 import LoadingScreen from './components/LoadingScreen';
 import TransactionsManager from './components/TransactionsManager';
 import CategoriesManager from './components/CategoriesManager';
-import { supabase } from './services/supabaseClient';
-import * as ApiService from './services/api';
+import * as ApiService from './services/api.mongo';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ResetPasswordLazy from './ResetPasswordLazy';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -437,48 +438,60 @@ const App: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (!currentUser) {
-    return (
-      <Auth 
-        onLogin={handleLogin} 
-        onRegister={handleRegister} 
-        onGoogleLogin={handleGoogleLogin}
-        error={authError} 
-        onClearError={() => setAuthError('')} 
-      />
-    );
-  }
-
   return (
-    <>
-      <Layout 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        user={currentUser}
-        onLogout={handleLogout}
-        onOpenNewTransaction={() => setTransactionModalOpen(true)}
-      >
-        {renderContent()}
-      </Layout>
-      
-      <TransactionForm 
-        isOpen={isTransactionModalOpen}
-        onClose={() => {
-          setTransactionModalOpen(false);
-          setEditingTransaction(null);
-        }}
-        onSave={handleSaveTransactions}
-        editingTransaction={editingTransaction}
-        onUpdate={handleUpdateTransaction}
-        cards={cards}
-        categories={categories}
-        onAddCategory={(cat) => setCategories(prev => [...prev, cat])}
-      />
-    </>
+    <Router>
+      <Routes>
+        <Route
+          path="/reset-password"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <ResetPasswordLazy />
+            </Suspense>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            isLoading ? (
+              <LoadingScreen />
+            ) : !currentUser ? (
+              <Auth
+                onLogin={handleLogin}
+                onRegister={handleRegister}
+                onGoogleLogin={handleGoogleLogin}
+                error={authError}
+                onClearError={() => setAuthError('')}
+              />
+            ) : (
+              <>
+                <Layout
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  user={currentUser}
+                  onLogout={handleLogout}
+                  onOpenNewTransaction={() => setTransactionModalOpen(true)}
+                >
+                  {renderContent()}
+                </Layout>
+                <TransactionForm
+                  isOpen={isTransactionModalOpen}
+                  onClose={() => {
+                    setTransactionModalOpen(false);
+                    setEditingTransaction(null);
+                  }}
+                  onSave={handleSaveTransactions}
+                  editingTransaction={editingTransaction}
+                  onUpdate={handleUpdateTransaction}
+                  cards={cards}
+                  categories={categories}
+                  onAddCategory={(cat) => setCategories(prev => [...prev, cat])}
+                />
+              </>
+            )
+          }
+        />
+      </Routes>
+    </Router>
   );
 };
 

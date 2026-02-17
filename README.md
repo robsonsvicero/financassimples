@@ -28,56 +28,18 @@ npm install
 
 ### 3. Configurar Variáveis de Ambiente
 Crie um arquivo chamado `.env.local` na raiz do projeto e adicione suas chaves. 
-Você vai precisar de uma chave do [Supabase](https://supabase.com) e uma do [Google AI Studio](https://aistudio.google.com/).
+Você vai precisar de uma connection string do [MongoDB no Railway](https://railway.app/) e uma do [Google AI Studio](https://aistudio.google.com/).
 
 ```env
-VITE_SUPABASE_URL=https://hafsbvfgfxctltxfoyfq.supabase.co
-VITE_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase
+VITE_MONGODB_URI=sua_connection_string_do_mongodb
+VITE_MONGODB_DB=financassimples
 VITE_GEMINI_API_KEY=sua_chave_gemini_api
 ```
 
-### 4. Configurar o Banco de Dados (Supabase)
-Vá até o painel do seu projeto no Supabase, clique em **SQL Editor** e execute o script abaixo para criar as tabelas:
+### 4. Configurar o Banco de Dados (MongoDB)
+Crie um projeto no Railway, adicione um plugin MongoDB e copie a connection string para o arquivo .env.local.
 
-```sql
--- Habilitar UUIDs
-create extension if not exists "uuid-ossp";
-
--- 1. Tabela de Perfis (Profiles) - Vinculada ao Auth do Supabase
-create table public.profiles (
-  id uuid references auth.users not null primary key,
-  email text,
-  name text,
-  avatar_url text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- 2. Tabela de Cartões de Crédito
-create table public.credit_cards (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references auth.users not null,
-  name text not null,
-  closing_day integer not null,
-  due_day integer not null,
-  color text default 'bg-slate-800',
-  limit_amount numeric default 0,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- 3. Tabela de Categorias Personalizadas
-create table public.categories (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references auth.users not null,
-  name text not null,
-  icon text,
-  color text,
-  type text check (type in ('INCOME', 'EXPENSE', 'BOTH')),
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- 4. Tabela de Transações
-create table public.transactions (
-  id uuid default uuid_generate_v4() primary key,
+Não é necessário criar tabelas manualmente, pois o MongoDB é NoSQL e as coleções são criadas automaticamente ao inserir dados.
   user_id uuid references auth.users not null,
   description text not null,
   amount numeric not null,

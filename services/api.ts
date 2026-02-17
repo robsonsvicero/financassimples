@@ -1,3 +1,5 @@
+// Arquivo obsoleto após migração para MongoDB.
+// Todas as funções de API agora estão em services/api.mongo.ts
 import { supabase } from './supabaseClient';
 import { Transaction, CreditCard, Budget, User, Category } from '../types';
 import { INITIAL_CATEGORIES } from '../constants';

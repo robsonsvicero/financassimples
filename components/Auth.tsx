@@ -16,11 +16,11 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       if (isRegistering) {
         if (!name || !email || !password) return;
@@ -31,6 +31,34 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Recuperação de senha
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoveryStatus, setRecoveryStatus] = useState('');
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const BACKEND_URL = 'https://mongodb-production-dab3.up.railway.app'; // Troque para sua URL real
+
+  const handleRecovery = async () => {
+    setRecoveryLoading(true);
+    setRecoveryStatus('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: recoveryEmail })
+      });
+      if (res.ok) {
+        setRecoveryStatus('Se o e-mail existir, você receberá um link para redefinir sua senha.');
+      } else {
+        setRecoveryStatus('Erro ao solicitar recuperação.');
+      }
+    } catch {
+      setRecoveryStatus('Erro ao conectar ao servidor.');
+    } finally {
+      setRecoveryLoading(false);
     }
   };
 
@@ -84,16 +112,66 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
             />
           </div>
 
-          <div>
+
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/50 focus:ring-2 focus:ring-violet-500 outline-none transition-all shadow-sm text-gray-800"
+              className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/50 focus:ring-2 focus:ring-violet-500 outline-none transition-all shadow-sm text-gray-800 pr-12"
               placeholder="••••••••"
               required
             />
+            <button
+              type="button"
+              tabIndex={-1}
+              className="absolute right-3 top-9 transform -translate-y-1/2 text-gray-400 hover:text-violet-600 focus:outline-none"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+            >
+              {showPassword ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675m2.062-2.325A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10 0 1.657-.336 3.234-.938 4.675m-2.062 2.325A9.956 9.956 0 0112 21c-2.21 0-4.267-.72-5.938-1.95M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-9.938 4.675A9.956 9.956 0 0112 21c2.21 0 4.267-.72 5.938-1.95m2.062-2.325A9.956 9.956 0 0022 13c0-5.523-4.477-10-10-10-1.657 0-3.234.336-4.675.938m-2.325 2.062A9.956 9.956 0 003 12c0 1.657.336 3.234.938 4.675" /></svg>
+              )}
+            </button>
+            <div className="flex justify-end mt-1">
+              {!isRegistering && (
+                <button
+                  type="button"
+                  className="text-xs text-violet-600 hover:underline focus:outline-none"
+                  onClick={() => setShowRecovery(true)}
+                >
+                  Esqueci minha senha
+                </button>
+              )}
+            </div>
+                {/* Modal de recuperação de senha */}
+                {showRecovery && (
+                  <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
+                      <button className="absolute top-2 right-2 text-gray-400 hover:text-violet-600" onClick={() => setShowRecovery(false)}>&times;</button>
+                      <h2 className="text-lg font-bold mb-2 text-violet-700">Recuperar senha</h2>
+                      <input
+                        type="email"
+                        value={recoveryEmail}
+                        onChange={e => setRecoveryEmail(e.target.value)}
+                        className="w-full px-4 py-2 rounded-xl border border-gray-200 mb-3"
+                        placeholder="Digite seu e-mail"
+                        autoFocus
+                      />
+                      <button
+                        className="w-full py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold rounded-xl mt-2"
+                        disabled={recoveryLoading || !recoveryEmail}
+                        onClick={handleRecovery}
+                      >
+                        {recoveryLoading ? 'Enviando...' : 'Enviar link de recuperação'}
+                      </button>
+                      {recoveryStatus && <p className="mt-3 text-sm text-gray-600 text-center">{recoveryStatus}</p>}
+                    </div>
+                  </div>
+                )}
           </div>
 
           <button

@@ -32,16 +32,15 @@
 - ✅ Documentadas todas as variáveis de ambiente necessárias
 
 ### 6. **Segurança de Dados**
-- ✅ Implementado filtro por `user_id` em todas as queries do Supabase
-- ✅ Garantido isolamento de dados entre usuários
-- ✅ Alinhado com as políticas RLS do Supabase
+✅ Implementado filtro por `user_id` em todas as queries do MongoDB
+✅ Garantido isolamento de dados entre usuários
 
 ## 📋 Checklist Pré-Build
 
 Antes de fazer o build, certifique-se de:
 
 - [ ] Criar arquivo `.env.local` baseado no `.env.example`
-- [ ] Preencher todas as variáveis de ambiente (Supabase URL, Anon Key, Gemini API Key)
+- [ ] Preencher todas as variáveis de ambiente (VITE_MONGODB_URI, VITE_MONGODB_DB, VITE_GEMINI_API_KEY)
 - [ ] Executar `npm install` para garantir todas as dependências
 - [ ] Testar a aplicação localmente com `npm run dev`
 - [ ] Verificar se todas as funcionalidades estão funcionando
@@ -70,8 +69,7 @@ O comando `npm run build` irá:
 ## ⚠️ Notas Importantes
 
 - Os avisos do Tailwind (`@tailwind`) no CSS são normais e não afetam o build
-- Certifique-se de que o Supabase está configurado corretamente
-- As políticas RLS do Supabase devem estar ativas para segurança
+- Certifique-se de que a connection string do MongoDB está correta
 - Não commitar arquivos `.env` ou `.env.local` no Git
 
 ## 🎯 Melhorias Futuras Sugeridas

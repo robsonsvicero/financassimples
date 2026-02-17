@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faUser, faShield, faWarning } from '@fortawesome/free-solid-svg-icons';
-import * as ApiService from '../services/api';
+import * as ApiService from '../services/api.mongo';
 
 interface UserManagementProps {
   currentUser: User;
