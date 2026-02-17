@@ -1,3 +1,18 @@
+// --- Auth Placeholders ---
+export const login = async (email: string, _password: string) => {
+  // Implemente a lógica real de login aqui
+  return { email };
+};
+
+export const register = async (name: string, email: string, _password: string) => {
+  // Implemente a lógica real de cadastro aqui
+  return { name, email };
+};
+
+export const signOut = async () => {
+  // Implemente a lógica real de logout aqui
+  return true;
+};
 import { getMongoDb } from './mongoClient';
 import { Transaction, CreditCard, Budget, User, Category } from '../types';
 import { INITIAL_CATEGORIES } from '../constants';

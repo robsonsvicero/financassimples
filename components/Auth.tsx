@@ -21,6 +21,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       if (isRegistering) {
         if (!name || !email || !password) return;
@@ -31,34 +32,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
       }
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Recuperação de senha
-  const [showRecovery, setShowRecovery] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState('');
-  const [recoveryStatus, setRecoveryStatus] = useState('');
-  const [recoveryLoading, setRecoveryLoading] = useState(false);
-  const BACKEND_URL = 'https://mongodb-production-dab3.up.railway.app'; // Troque para sua URL real
-
-  const handleRecovery = async () => {
-    setRecoveryLoading(true);
-    setRecoveryStatus('');
-    try {
-      const res = await fetch(`${BACKEND_URL}/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: recoveryEmail })
-      });
-      if (res.ok) {
-        setRecoveryStatus('Se o e-mail existir, você receberá um link para redefinir sua senha.');
-      } else {
-        setRecoveryStatus('Erro ao solicitar recuperação.');
-      }
-    } catch {
-      setRecoveryStatus('Erro ao conectar ao servidor.');
-    } finally {
-      setRecoveryLoading(false);
     }
   };
 
@@ -141,37 +114,12 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onRegister, onGoogleLogin, error, 
                 <button
                   type="button"
                   className="text-xs text-violet-600 hover:underline focus:outline-none"
-                  onClick={() => setShowRecovery(true)}
+                  onClick={() => alert('Funcionalidade de recuperação de senha ainda não implementada.')}
                 >
                   Esqueci minha senha
                 </button>
               )}
             </div>
-                {/* Modal de recuperação de senha */}
-                {showRecovery && (
-                  <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
-                      <button className="absolute top-2 right-2 text-gray-400 hover:text-violet-600" onClick={() => setShowRecovery(false)}>&times;</button>
-                      <h2 className="text-lg font-bold mb-2 text-violet-700">Recuperar senha</h2>
-                      <input
-                        type="email"
-                        value={recoveryEmail}
-                        onChange={e => setRecoveryEmail(e.target.value)}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-200 mb-3"
-                        placeholder="Digite seu e-mail"
-                        autoFocus
-                      />
-                      <button
-                        className="w-full py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold rounded-xl mt-2"
-                        disabled={recoveryLoading || !recoveryEmail}
-                        onClick={handleRecovery}
-                      >
-                        {recoveryLoading ? 'Enviando...' : 'Enviar link de recuperação'}
-                      </button>
-                      {recoveryStatus && <p className="mt-3 text-sm text-gray-600 text-center">{recoveryStatus}</p>}
-                    </div>
-                  </div>
-                )}
           </div>
 
           <button

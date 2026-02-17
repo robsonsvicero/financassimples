@@ -80,46 +80,8 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onRecalculateDu
       return;
     }
 
-    try {
-      // Importa o supabase
-      const { supabase } = await import('../services/supabaseClient');
-      
-      if (!supabase) {
-        setPasswordError('Erro ao conectar com o servidor');
-        return;
-      }
-      
-      // Verifica a senha atual fazendo login
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || '',
-        password: currentPassword
-      });
-
-      if (signInError) {
-        setPasswordError('Senha atual incorreta');
-        return;
-      }
-
-      // Atualiza a senha
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (updateError) {
-        setPasswordError('Erro ao atualizar senha: ' + updateError.message);
-        return;
-      }
-
-      // Sucesso
-      setPasswordSuccess(true);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setTimeout(() => setPasswordSuccess(false), 5000);
-    } catch (error) {
-      setPasswordError('Erro ao alterar senha');
-      console.error(error);
-    }
+    // TODO: Implementar alteração de senha usando API MongoDB
+    setPasswordError('Funcionalidade de alteração de senha ainda não implementada.');
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {

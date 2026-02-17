@@ -1,7 +1,7 @@
 import { MongoClient, Db } from 'mongodb';
 
-const MONGODB_URI = import.meta.env.VITE_MONGODB_URI || '';
-const MONGODB_DB = import.meta.env.VITE_MONGODB_DB || 'financassimples';
+const MONGODB_URI = process.env.VITE_MONGODB_URI || '';
+const MONGODB_DB = process.env.VITE_MONGODB_DB || 'financassimples';
 
 let client: MongoClient | null = null;
 let db: Db | null = null;

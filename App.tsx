@@ -30,86 +30,9 @@ const App: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
 
-  // 1. Check active session on mount
+  // 1. Check active session on mount (agora apenas desativa o loading)
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadingTimeout = setTimeout(() => {
-      if (isMounted && isLoading) {
-        setIsLoading(false);
-      }
-    }, 3000);
-    
-    if (supabase) {
-      // Listen for auth changes (incluindo sessão inicial)
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-        if (!isMounted || !supabase) return;
-        
-        if (session?.user) {
-          try {
-            // Busca profile com timeout de 3 segundos
-            const profilePromise = supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-            
-            const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout')), 3000)
-            );
-            
-            const { data: profile } = await Promise.race([
-              profilePromise,
-              timeoutPromise
-            ]) as any;
-            
-            const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
-            
-            const user: User = {
-              id: session.user.id,
-              email: session.user.email!,
-              name: profile?.name || session.user.user_metadata?.name || 'Usuário',
-              avatar: profile?.avatar_url,
-              isAdmin
-            };
-            
-            setCurrentUser(user);
-            loadData(user.id).catch(console.error);
-          } catch (error) {
-            // Fallback: cria usuário sem profile
-            const isAdmin = session.user.email === 'robsonsvicero@outlook.com';
-            const user: User = {
-              id: session.user.id,
-              email: session.user.email!,
-              name: session.user.user_metadata?.name || 'Usuário',
-              avatar: session.user.user_metadata?.avatar_url,
-              isAdmin
-            };
-            setCurrentUser(user);
-            loadData(user.id).catch(console.error);
-          }
-        } else {
-          setCurrentUser(null);
-          setTransactions([]);
-          setCards([]);
-          setBudgets([]);
-          setCategories([]);
-        }
-      });
-      
-      return () => {
-        isMounted = false;
-        clearTimeout(loadingTimeout);
-        subscription.unsubscribe();
-      };
-    } else {
-      setIsLoading(false);
-    }
-    
-    return () => {
-      isMounted = false;
-      clearTimeout(loadingTimeout);
-    };
+    setIsLoading(false);
   }, []);
 
   const loadData = useCallback(async (userId: string) => {
@@ -128,16 +51,14 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Login agora deve ser feito via ApiService (MongoDB)
   const handleLogin = useCallback(async (email: string, pass: string) => {
-    if (!supabase) {
-      const errorMsg = 'Supabase não configurado';
-      setAuthError(errorMsg);
-      throw new Error(errorMsg);
-    }
     try {
       setAuthError('');
-      const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
-      if (error) throw error;
+      await ApiService.login(email, pass);
+      // Atualize o usuário logado conforme retorno do seu ApiService
+      // Exemplo:
+      // setCurrentUser(await ApiService.getCurrentUser());
     } catch (err: any) {
       const errorMsg = err.message || 'Erro ao fazer login';
       setAuthError(errorMsg);
@@ -145,38 +66,20 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Cadastro agora deve ser feito via ApiService (MongoDB)
   const handleRegister = useCallback(async (name: string, email: string, pass: string) => {
-    if (!supabase) return;
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password: pass,
-        options: {
-          data: { name },
-          emailRedirectTo: window.location.origin
-        }
-      });
-      if (error) throw error;
+      await ApiService.register(name, email, pass);
       setAuthError('');
-      alert('Cadastro realizado! Verifique seu email se necessário ou faça login.');
+      alert('Cadastro realizado! Faça login.');
     } catch (err: any) {
       setAuthError(err.message || 'Erro ao cadastrar');
     }
   }, []);
 
+  // Login com Google desabilitado (remover ou adaptar para MongoDB se necessário)
   const handleGoogleLogin = useCallback(async () => {
-    if (!supabase) return;
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      setAuthError(err.message || 'Erro ao conectar com Google');
-    }
+    setAuthError('Login com Google desabilitado.');
   }, []);
 
   const handleLogout = useCallback(async () => {
@@ -316,10 +219,10 @@ const App: React.FC = () => {
       const newCard: CreditCard = {
         id: newCardRecord.id,
         name: newCardRecord.name,
-        closingDay: newCardRecord.closing_day,
-        dueDay: newCardRecord.due_day,
+        closingDay: newCardRecord.closingDay,
+        dueDay: newCardRecord.dueDay,
         color: newCardRecord.color,
-        limit: newCardRecord.limit_amount
+        limit: newCardRecord.limit
       };
       setCards(prev => [...prev, newCard]);
     } catch (error) {
