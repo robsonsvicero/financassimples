@@ -1,3 +1,10 @@
+// Middleware para exigir autenticação
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    return next();
+  }
+  res.status(401).json({ error: 'Não autenticado' });
+}
 // Logout seguro
 app.post('/api/auth/logout', (req, res) => {
   req.logout(function(err) {
@@ -85,8 +92,11 @@ app.post('/api/login', async (req, res) => {
 
 const app = express();
 // Sessão para Passport
+if (!process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET não definida nas variáveis de ambiente.');
+}
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'financassimples_secret',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false } // true se usar HTTPS
@@ -95,6 +105,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Configuração do Passport Google
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_CALLBACK_URL) {
+  throw new Error('Google OAuth: variáveis de ambiente obrigatórias não definidas.');
+}
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -183,7 +196,7 @@ async function connectDb() {
   return db;
 }
 
-app.get('/api/data', async (req, res) => {
+app.get('/api/data', ensureAuthenticated, async (req, res) => {
   try {
     const userId = req.query.userId;
     const db = await connectDb();
@@ -197,7 +210,7 @@ app.get('/api/data', async (req, res) => {
   }
 });
 
-app.post('/api/transactions', async (req, res) => {
+app.post('/api/transactions', ensureAuthenticated, async (req, res) => {
   try {
     const { transactions, userId } = req.body;
     const db = await connectDb();

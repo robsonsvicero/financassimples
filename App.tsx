@@ -9,7 +9,6 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import UserManagement from './components/UserManagement';
 import Auth from './components/Auth';
-import LoadingScreen from './components/LoadingScreen';
 import TransactionsManager from './components/TransactionsManager';
 import CategoriesManager from './components/CategoriesManager';
 // TODO: Implemente as funções de API usando fetch para o backend
@@ -91,22 +90,15 @@ import * as ApiService from './services/api.mongo';
 
   // Login com Google: redireciona para o backend
   const handleGoogleLogin = useCallback(() => {
-    window.location.href = 'https://robsonsvicero.net/api/auth/google';
-      await ApiService.register(name, email, password);
-      const user = await ApiService.getCurrentUser();
-      setCurrentUser(user);
+    window.location.href = (import.meta.env.VITE_BACKEND_URL || 'https://robsonsvicero.net') + '/api/auth/google';
   }, []);
   // Detecta retorno do Google OAuth2
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('google') === 'success') {
-      // Buscar usuário autenticado na sessão
-      fetch('https://robsonsvicero.net/api/auth/me', {
-    window.location.href = (import.meta.env.VITE_BACKEND_URL || 'https://robsonsvicero.net') + '/api/auth/google';
-      })
-        .then(async (res) => {
-          if (res.ok) {
-            const data = await res.json();
+      ApiService.getCurrentUser()
+        .then((data) => {
+          if (data && data.user) {
             setCurrentUser(data.user);
             setAuthError('');
             window.history.replaceState({}, document.title, '/');
@@ -123,15 +115,13 @@ import * as ApiService from './services/api.mongo';
 
   const handleLogout = useCallback(async () => {
     try {
-      await fetch('https://robsonsvicero.net/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
+      await ApiService.logout();
       setCurrentUser(null);
       setActiveTab('dashboard');
     } catch (error) {
       setAuthError('Erro ao sair.');
-      await ApiService.logout();
+    }
+  }, []);
   const handleUpdateUser = async (updatedUser: User) => {
     try {
       // await fetch('URL_DO_BACKEND/api/user', { method: 'PUT', body: JSON.stringify({ ... }) })
@@ -375,7 +365,7 @@ import * as ApiService from './services/api.mongo';
         <Route
           path="/reset-password"
           element={
-            <Suspense fallback={<LoadingScreen />}>
+            <Suspense fallback={null}>
               <ResetPasswordLazy />
             </Suspense>
           }
@@ -384,7 +374,7 @@ import * as ApiService from './services/api.mongo';
           path="*"
           element={
             isLoading ? (
-              <LoadingScreen />
+              null
             ) : !currentUser ? (
               <Auth
                 onLogin={handleLogin}
