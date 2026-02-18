@@ -19,62 +19,8 @@ const DEFAULT_DATA: UserData = {
   budgets: []
 };
 
-// --- Authentication ---
-
-export const getStoredUsers = (): any[] => {
-  const usersStr = localStorage.getItem(USERS_KEY);
-  return usersStr ? JSON.parse(usersStr) : [];
-};
-
-export const registerUser = (name: string, email: string, password: string): User | null => {
-  const users = getStoredUsers();
-  
-  if (users.find((u: any) => u.email === email)) {
-    throw new Error('Este email já está cadastrado.');
-  }
-
-  const newUser = {
-    id: Math.random().toString(36).substr(2, 9),
-    name,
-    email,
-    password, // Note: In a real app, never store plain text passwords!
-    avatar: ''
-  };
-
-  users.push(newUser);
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-
-  // Initialize data for new user
-  saveUserData(newUser.id, DEFAULT_DATA);
-
-  // Return user without password
-  const { password: _, ...userSafe } = newUser;
-  return userSafe as User;
-};
-
-export const authenticateUser = (email: string, password: string): User | null => {
-  const users = getStoredUsers();
-  const user = users.find((u: any) => u.email === email && u.password === password);
-
-  if (!user) {
-    throw new Error('Email ou senha inválidos.');
-  }
-
-  const { password: _, ...userSafe } = user;
-  return userSafe as User;
-};
-
-export const updateUserProfile = (user: User): void => {
-  const users = getStoredUsers();
-  const index = users.findIndex((u: any) => u.id === user.id);
-  
-  if (index !== -1) {
-    // Preserve the password which is not in the User object
-    const currentPassword = users[index].password;
-    users[index] = { ...user, password: currentPassword };
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
-};
+// --- Authentication removida ---
+// Toda autenticação deve ser feita via backend (API REST)
 
 // --- Data Management ---
 

@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-
-// Troque para sua URL real do backend
-const BACKEND_URL = 'https://mongodb-production-dab3.up.railway.app';
+import * as ApiService from '../services/api.mongo';
 
 const ResetPassword: React.FC = () => {
   const params = new URLSearchParams(window.location.search);
@@ -15,18 +13,10 @@ const ResetPassword: React.FC = () => {
     setLoading(true);
     setStatus('');
     try {
-      const res = await fetch(`${BACKEND_URL}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password })
-      });
-      if (res.ok) {
-        setStatus('Senha redefinida com sucesso! Faça login com sua nova senha.');
-      } else {
-        setStatus('Token inválido ou expirado. Solicite um novo link.');
-      }
+      await ApiService.resetPassword(token, password);
+      setStatus('Senha redefinida com sucesso! Faça login com sua nova senha.');
     } catch {
-      setStatus('Erro ao conectar ao servidor.');
+      setStatus('Token inválido ou expirado. Solicite um novo link.');
     } finally {
       setLoading(false);
     }

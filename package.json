@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
@@ -15,9 +16,14 @@
     "@google/genai": "^1.30.0",
     "@supabase/supabase-js": "^2.96.0",
     "@types/react-router-dom": "^5.3.3",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.3.1",
+    "express-session": "^1.19.0",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
     "mongodb": "^7.1.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.13.0",
@@ -25,13 +31,26 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.22",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.2.2",
     "vite": "^5.4.21"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom/extend-expect"
+    ]
   }
 }

@@ -14,7 +14,6 @@ dist-ssr
 .env
 .env.local
 .env.production
-client_secret_*.json
 
 # Editor directories and files
 .vscode/*
@@ -26,3 +25,4 @@ client_secret_*.json
 *.njsproj
 *.sln
 *.sw?
+client_secret_*.json

@@ -12,14 +12,16 @@ import Auth from './components/Auth';
 import LoadingScreen from './components/LoadingScreen';
 import TransactionsManager from './components/TransactionsManager';
 import CategoriesManager from './components/CategoriesManager';
-import * as ApiService from './services/api.mongo';
+// TODO: Implemente as funções de API usando fetch para o backend
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ResetPasswordLazy from './ResetPasswordLazy';
+// TODO: Implemente as funções de API usando fetch para o backend
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+import * as ApiService from './services/api.mongo';
   const [isTransactionModalOpen, setTransactionModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [authError, setAuthError] = useState('');
@@ -35,15 +37,20 @@ const App: React.FC = () => {
     setIsLoading(false);
   }, []);
 
-  const loadData = useCallback(async (userId: string) => {
+  // Função de carregamento de dados (placeholder)
+  const loadData = useCallback(async (_userId: string) => {
     try {
-      const data = await ApiService.fetchData(userId);
-      setTransactions(data.transactions || []);
-      setCards(data.cards || []);
-      setCategories(data.categories || []);
-      setBudgets(data.budgets || []);
+      const [transactions, cards, categories, budgets] = await Promise.all([
+        ApiService.getTransactions(),
+        ApiService.getCards(),
+        ApiService.getCategories(),
+        ApiService.getBudgets()
+      ]);
+      setTransactions(transactions);
+      setCards(cards);
+      setCategories(categories);
+      setBudgets(budgets);
     } catch (error) {
-      console.error("Error loading data:", error);
       setTransactions([]);
       setCards([]);
       setCategories([]);
@@ -52,14 +59,15 @@ const App: React.FC = () => {
   }, []);
 
   // Login agora deve ser feito via ApiService (MongoDB)
-  const handleLogin = useCallback(async (email: string, pass: string) => {
+  const handleLogin = useCallback(async (_email: string, _pass: string) => {
     try {
       setAuthError('');
-      await ApiService.login(email, pass);
+      // await fetch('URL_DO_BACKEND/api/login', { method: 'POST', body: JSON.stringify({ email, pass }) })
+      // Implemente a chamada correta para login
       // Atualize o usuário logado conforme retorno do seu ApiService
       // Exemplo:
       // setCurrentUser(await ApiService.getCurrentUser());
-    } catch (err: any) {
+  const handleLogin = useCallback(async (email: string, password: string) => {
       const errorMsg = err.message || 'Erro ao fazer login';
       setAuthError(errorMsg);
       throw err;
@@ -67,34 +75,67 @@ const App: React.FC = () => {
   }, []);
 
   // Cadastro agora deve ser feito via ApiService (MongoDB)
-  const handleRegister = useCallback(async (name: string, email: string, pass: string) => {
+      await ApiService.login(email, password);
+      const user = await ApiService.getCurrentUser();
+      setCurrentUser(user);
+  const handleRegister = useCallback(async (_name: string, _email: string, _pass: string) => {
     try {
-      await ApiService.register(name, email, pass);
+      // await fetch('URL_DO_BACKEND/api/register', { method: 'POST', body: JSON.stringify({ name, email, pass }) })
+      // Implemente a chamada correta para cadastro
       setAuthError('');
       alert('Cadastro realizado! Faça login.');
     } catch (err: any) {
       setAuthError(err.message || 'Erro ao cadastrar');
-    }
+  const handleRegister = useCallback(async (name: string, email: string, password: string) => {
   }, []);
 
-  // Login com Google desabilitado (remover ou adaptar para MongoDB se necessário)
-  const handleGoogleLogin = useCallback(async () => {
-    setAuthError('Login com Google desabilitado.');
+  // Login com Google: redireciona para o backend
+  const handleGoogleLogin = useCallback(() => {
+    window.location.href = 'https://robsonsvicero.net/api/auth/google';
+      await ApiService.register(name, email, password);
+      const user = await ApiService.getCurrentUser();
+      setCurrentUser(user);
+  }, []);
+  // Detecta retorno do Google OAuth2
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('google') === 'success') {
+      // Buscar usuário autenticado na sessão
+      fetch('https://robsonsvicero.net/api/auth/me', {
+    window.location.href = (import.meta.env.VITE_BACKEND_URL || 'https://robsonsvicero.net') + '/api/auth/google';
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setCurrentUser(data.user);
+            setAuthError('');
+            window.history.replaceState({}, document.title, '/');
+          } else {
+            setAuthError('Erro ao autenticar com Google.');
+          }
+        })
+        .catch(() => setAuthError('Erro ao autenticar com Google.'));
+    } else if (params.get('google') === 'fail') {
+      setAuthError('Falha ao autenticar com Google.');
+      window.history.replaceState({}, document.title, '/');
+    }
   }, []);
 
   const handleLogout = useCallback(async () => {
     try {
-      await ApiService.signOut();
+      await fetch('https://robsonsvicero.net/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
       setCurrentUser(null);
       setActiveTab('dashboard');
     } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  }, []);
-
+      setAuthError('Erro ao sair.');
+      await ApiService.logout();
   const handleUpdateUser = async (updatedUser: User) => {
     try {
-      await ApiService.updateUserProfile(updatedUser.id, updatedUser.name, updatedUser.avatar || '');
+      // await fetch('URL_DO_BACKEND/api/user', { method: 'PUT', body: JSON.stringify({ ... }) })
+      // Implemente a chamada correta para atualizar perfil
       setCurrentUser(updatedUser);
     } catch (e) {
       console.error("Failed to update profile", e);
@@ -107,7 +148,8 @@ const App: React.FC = () => {
     if (!currentUser) return;
     try {
       setTransactions(prev => [...prev, ...newTransactions]);
-      await ApiService.addTransactions(newTransactions, currentUser.id);
+      // await fetch('URL_DO_BACKEND/api/transactions', { method: 'POST', body: JSON.stringify({ ... }) })
+      // Implemente a chamada correta para adicionar transações
       loadData(currentUser.id); 
     } catch (error) {
       console.error("Error saving transaction", error);
@@ -119,22 +161,21 @@ const App: React.FC = () => {
   const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
     try {
       setTransactions(prev => prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
-      await ApiService.updateTransaction(updatedTransaction);
+      // await fetch('URL_DO_BACKEND/api/transactions/' + updatedTransaction.id, { method: 'PUT', body: JSON.stringify(updatedTransaction) })
+      // Implemente a chamada correta para atualizar transação
     } catch (error) {
       console.error("Error updating transaction", error);
       alert("Erro ao atualizar transação");
     }
   };
 
-  const handleUpdateMultipleTransactions = async (updatedTransactions: Transaction[]) => {
+      await ApiService.updateTransaction(updatedTransaction.id, updatedTransaction);
     try {
       // Atualiza o estado local primeiro
       setTransactions(updatedTransactions);
       
       // Atualiza cada transação no banco de dados
-      await Promise.all(
-        updatedTransactions.map(transaction => ApiService.updateTransaction(transaction))
-      );
+      // TODO: Implemente a chamada correta para atualizar várias transações
     } catch (error) {
       console.error("Error updating transactions", error);
       alert("Erro ao atualizar transações");
@@ -146,13 +187,14 @@ const App: React.FC = () => {
   const handleDeleteTransaction = async (id: string) => {
     try {
       setTransactions(prev => prev.filter(t => t.id !== id));
-      await ApiService.deleteTransaction(id);
+      // await fetch('URL_DO_BACKEND/api/transactions/' + id, { method: 'DELETE' })
+      // Implemente a chamada correta para deletar transação
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleRecalculateDueDates = async () => {
+      await ApiService.deleteTransaction(id);
     if (!currentUser) return;
     
     // Filtra apenas transações de crédito com cartão
@@ -205,9 +247,7 @@ const App: React.FC = () => {
 
     // Atualiza as transações que mudaram
     if (updatedTransactions.length > 0) {
-      await Promise.all(
-        updatedTransactions.map(t => ApiService.updateTransaction(t))
-      );
+      // TODO: Implemente a chamada correta para atualizar várias transações
       loadData(currentUser.id);
     }
   };
@@ -215,54 +255,46 @@ const App: React.FC = () => {
   const handleAddCard = async (card: CreditCard) => {
     if (!currentUser) return;
     try {
-      const newCardRecord = await ApiService.addCard(card, currentUser.id);
-      const newCard: CreditCard = {
-        id: newCardRecord.id,
-        name: newCardRecord.name,
-        closingDay: newCardRecord.closingDay,
-        dueDay: newCardRecord.dueDay,
-        color: newCardRecord.color,
-        limit: newCardRecord.limit
-      };
+      const newCard = await ApiService.addCard(card);
       setCards(prev => [...prev, newCard]);
     } catch (error) {
-      console.error("Error adding card", error);
+      alert('Erro ao adicionar cartão');
     }
   };
 
   const handleEditCard = async (updatedCard: CreditCard) => {
     try {
-      setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
-      await ApiService.updateCard(updatedCard);
+      const card = await ApiService.updateCard(updatedCard.id, updatedCard);
+      setCards(prev => prev.map(c => c.id === updatedCard.id ? card : c));
     } catch (error) {
-      console.error(error);
+      alert('Erro ao atualizar cartão');
     }
   };
 
   const handleDeleteCard = async (id: string) => {
     try {
-      setCards(prev => prev.filter(c => c.id !== id));
       await ApiService.deleteCard(id);
+      setCards(prev => prev.filter(c => c.id !== id));
     } catch (error) {
-      console.error(error);
+      alert('Erro ao deletar cartão');
     }
   };
 
   const handleUpdateBudget = async (budget: Budget) => {
     if (!currentUser) return;
     try {
+      const updated = await ApiService.updateBudget(budget.categoryId + '-' + budget.month, budget);
       setBudgets(prev => {
         const existing = prev.findIndex(b => b.categoryId === budget.categoryId && b.month === budget.month);
         if (existing >= 0) {
-          const updated = [...prev];
-          updated[existing] = budget;
-          return updated;
+          const arr = [...prev];
+          arr[existing] = updated;
+          return arr;
         }
-        return [...prev, budget];
+        return [...prev, updated];
       });
-      await ApiService.upsertBudget(budget, currentUser.id);
     } catch (error) {
-      console.error(error);
+      alert('Erro ao atualizar orçamento');
     }
   };
 
@@ -301,21 +333,18 @@ const App: React.FC = () => {
           <CategoriesManager
             categories={categories}
             onAdd={async (cat) => {
-              if (!currentUser) return;
               try {
-                const newCat = await ApiService.addCategory(cat, currentUser.id);
-                setCategories([...categories, { ...cat, id: newCat.id }]);
+                const newCat = await ApiService.addCategory(cat);
+                setCategories(prev => [...prev, newCat]);
               } catch (error) {
-                console.error('Error adding category:', error);
                 alert('Erro ao adicionar categoria');
               }
             }}
             onEdit={async (cat) => {
               try {
-                await ApiService.updateCategory(cat);
-                setCategories(categories.map(c => c.id === cat.id ? cat : c));
+                const updated = await ApiService.updateCategory(cat.id, cat);
+                setCategories(categories.map(c => c.id === cat.id ? updated : c));
               } catch (error) {
-                console.error('Error updating category:', error);
                 alert('Erro ao atualizar categoria');
               }
             }}
@@ -324,7 +353,6 @@ const App: React.FC = () => {
                 await ApiService.deleteCategory(id);
                 setCategories(categories.filter(c => c.id !== id));
               } catch (error) {
-                console.error('Error deleting category:', error);
                 alert('Erro ao deletar categoria');
               }
             }}

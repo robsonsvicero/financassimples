@@ -20,7 +20,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const allUsers = await ApiService.listAllUsers();
+      const allUsers = await ApiService.getUsers();
       setUsers(allUsers);
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
@@ -35,7 +35,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
       alert('Você não pode excluir seu próprio usuário!');
       return;
     }
-
     try {
       await ApiService.deleteUser(userId);
       setUsers(users.filter(u => u.id !== userId));
