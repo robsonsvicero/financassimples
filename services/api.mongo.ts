@@ -120,7 +120,14 @@ export async function login(email: string, password: string) {
     credentials: 'include',
     body: JSON.stringify({ email, password })
   });
-  if (!res.ok) throw new Error('Falha no login');
+  if (!res.ok) {
+    let msg = 'Falha no login';
+    try {
+      const data = await res.json();
+      msg = data?.error || msg;
+    } catch {}
+    throw new Error(msg);
+  }
   return res.json();
 }
 
@@ -131,7 +138,14 @@ export async function register(name: string, email: string, password: string) {
     credentials: 'include',
     body: JSON.stringify({ name, email, password })
   });
-  if (!res.ok) throw new Error('Falha no cadastro');
+  if (!res.ok) {
+    let msg = 'Falha no cadastro';
+    try {
+      const data = await res.json();
+      msg = data?.error || msg;
+    } catch {}
+    throw new Error(msg);
+  }
   return res.json();
 }
 
